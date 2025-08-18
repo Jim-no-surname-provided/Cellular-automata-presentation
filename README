@@ -1,0 +1,11 @@
+To install the venv with its dependencies run setup.ps1
+
+If you modify the requirements.in, run
+    pip-compile requirements.in
+to update requirements.txt
+
+To compile the Slides to videos use
+    manim-slides render main.py Main
+
+To run the Slides in a slideshow use
+    manim-slides Main

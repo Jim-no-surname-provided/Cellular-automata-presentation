@@ -1,17 +1,14 @@
 from manim import *
 from manim_slides import Slide, ThreeDSlide
-from title import play_cellular_automata_title
+from title import play as title
 
 
 class Main(Slide):
     def construct(self):
-        self.title()
+        title()
         self.intro()
         self.game_of_life()
         self.community_achievements()
-
-    def title(self):
-        play_cellular_automata_title(self)
 
     def intro(self):
         pass

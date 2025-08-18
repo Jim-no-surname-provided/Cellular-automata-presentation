@@ -85,7 +85,7 @@ def rasterize_title_mask(scene, mob, H, W, thresh=128, pad_px=4):
     return (arr >= thresh).astype(np.uint8)
 
 
-def play_cellular_automata_title(slide):
+def play(slide):
     """Plays the Cellular Automata title animation on the given Slide."""
     # Step 1: Draw the title
     title = Text(TITLE, weight=BOLD)
