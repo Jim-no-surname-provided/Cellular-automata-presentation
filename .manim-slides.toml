@@ -8,15 +8,24 @@ ids = [32]
 
 [keys.NEXT]
 name = 'NEXT'
-ids = [16777238, 16777236]
+ids = [
+    16777236,
+    16777238,
+]
 
 [keys.PREVIOUS]
 name = 'PREVIOUS'
-ids = [16777239, 16777234]
+ids = [
+    16777234,
+    16777239,
+]
 
 [keys.REVERSE]
 name = 'REVERSE'
-ids = [86, 82]
+ids = [
+    82,
+    86,
+]
 
 [keys.REPLAY]
 name = 'REPLAY'
@@ -24,7 +33,10 @@ ids = [16777217]
 
 [keys.FULL_SCREEN]
 name = 'TOGGLE FULL SCREEN'
-ids = [70]
+ids = [
+    16777274,
+    70,
+]
 
 [keys.HIDE_MOUSE]
 name = 'HIDE / SHOW MOUSE'

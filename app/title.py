@@ -105,7 +105,6 @@ def play(slide):
     slide.play(FadeOut(title), FadeIn(grid))
 
     # Step 5: Run Game of Life
-    # Run first steps normally
     fade_start = max(0, STEPS - FADE_STEPS)
 
     for i in range(STEPS):
