@@ -14,5 +14,5 @@ pip install pip-tools
 if (Test-Path "requirements.txt") {
     pip-sync requirements.txt
 } else {
-    Write-Host "requirements.txt not found. Run: pip-compile requirements.in"
+    pip-compile requirements.in
 }

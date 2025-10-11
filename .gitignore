@@ -1,0 +1,96 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.py.class
+
+# C extensions
+*.so
+*.dylib
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# PyInstaller / packaging
+*.spec
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb~
+
+# Logs and debug
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+.cache
+nosetests.xml
+pytest_cache/
+.pytest_cache/
+.pyre/
+
+# Type checker & static analysis
+.mypy_cache/
+.dmypy.json
+.pytype/
+.pyre/
+ruff_cache/
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# Tools
+pip-wheel-metadata/
+site/
+.mach/
+.pybuild/
+__pypackages__/
+*.pyproj
+
+# Local files
+*.sqlite3
+.envrc
+*.env
+.env.local
+.env.development
+.env.production
+
+# OS-specific
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Desktop.ini
+
+# === Optional extras ===
+# Uncomment if you use these:
+# notebooks/.ipynb_checkpoints/
+# .hypothesis/
+# .pytest_cache/
+.vscode/
+# .idea/
