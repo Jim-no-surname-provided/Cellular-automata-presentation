@@ -5,7 +5,7 @@ __pycache__/
 *.pyd
 *.pdb
 *.pkl
-*.py.class
+*.py.classahh
 
 # C extensions
 *.so
