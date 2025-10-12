@@ -1,6 +1,0 @@
-To create the video (and a json you'll need for the slides) from a scene (let's call it SCENE), you want to run the following command:
-    manim example.py SCENE
-
-To then convert that into an .html, you want to use
-    manim-slides convert SCENE scene.html -ccontrols=true
-unless you don't want the controls at the bottom
