@@ -94,3 +94,8 @@ Desktop.ini
 # .pytest_cache/
 .vscode/
 # .idea/
+
+# manim-slides
+slides/
+out/
+media/

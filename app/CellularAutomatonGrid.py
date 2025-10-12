@@ -17,7 +17,8 @@ class CellularAutomatonGrid(VGroup):
         rule: "Callable[[tuple[bool, ...]], bool] | None" = None,
     ):
         """
-        neighborhood: tuple of tuples with RELATIVE coordinates to each cell.
+        neighborhood: tuple of tuples with RELATIVE coordinates (dx, dy) to each cell.
+          - Coordinate convention: x right is positive, y up is positive, (0,0) is the center cell.
           - Order matters: the tuple order is exactly the order passed to the rule.
           - Example (identity / doNothing rule):
               neighborhood = ((0, 0),)
@@ -37,7 +38,7 @@ class CellularAutomatonGrid(VGroup):
         self._neighborhood: tuple[tuple[int, int], ...] | None = neighborhood
         self._rule = rule
 
-        # Build grid
+        # Build grid (stored flat, row-major, top-to-bottom)
         self.cells = VGroup(*[Square(side_length=cell_size) for _ in range(rows * cols)])
         self.cells.set_stroke(stroke_color, stroke_width).set_fill(off_color, 0.0)
         self.cells.arrange_in_grid(rows=rows, cols=cols, buff=buff, center=True)
@@ -47,59 +48,81 @@ class CellularAutomatonGrid(VGroup):
         for cell in self.cells:
             cell.alive = False
 
-    # --- indexing ---
-    def idx(self, r: int, c: int) -> int:
-        return r * self.cols + c
+    # --- coordinate conversion (centered x,y) ---
+    def xy_to_index(self, x: int, y: int) -> int:
+        """Convert centered (x,y) to list index. x right+, y up+, (0,0) at center."""
+        row = (self.rows // 2) - y
+        col = (self.cols // 2) + x
+        if not (0 <= row < self.rows and 0 <= col < self.cols):
+            return -1  # out of bounds
+        return row * self.cols + col
+
+    def index_to_xy(self, index: int) -> tuple[int, int]:
+        """Inverse of xy_to_index: return centered (x,y)."""
+        row = index // self.cols
+        col = index % self.cols
+        y = (self.rows // 2) - row
+        x = col - (self.cols // 2)
+        return (x, y)
 
     # --- state accessors ---
-    def is_alive(self, r: int, c: int) -> bool:
-        return bool(getattr(self.cells[self.idx(r, c)], "alive", False))
+    def is_alive(self, x: int, y: int) -> bool:
+        idx = self.xy_to_index(x, y)
+        if idx == -1:
+            return False
+        return bool(getattr(self.cells[idx], "alive", False))
 
     def set_alive(self, *args, **kwargs):
         """
         Flexible setter:
-          - set_alive(r, c, alive=True)       -> set a single cell
-          - set_alive({(r,c), ...})           -> set many via a set of coords
+          - set_alive(x, y, alive=True)       -> set a single cell
+          - set_alive({(x,y), ...})           -> set many via a set of coords
         """
         if len(args) == 1 and isinstance(args[0], (set, frozenset)):
             alive_coords = args[0]
-            for r in range(self.rows):
-                for c in range(self.cols):
-                    self.cells[self.idx(r, c)].alive = ((r, c) in alive_coords)
+            for i in range(self.rows * self.cols):
+                x, y = self.index_to_xy(i)
+                self.cells[i].alive = ((x, y) in alive_coords)
             return self
 
         if len(args) >= 2:
-            r, c = int(args[0]), int(args[1])
+            x, y = int(args[0]), int(args[1])
             alive = kwargs.get("alive", args[2] if len(args) >= 3 else True)
-            self.cells[self.idx(r, c)].alive = bool(alive)
+            idx = self.xy_to_index(x, y)
+            if idx != -1:
+                self.cells[idx].alive = bool(alive)
             return self
 
-        raise TypeError("set_alive expects either (r, c, alive=True) or a set of (r,c) tuples.")
+        raise TypeError("set_alive expects either (x, y, alive=True) or a set of (x,y) tuples.")
 
     # --- rendering ---
     def render_cells(self):
         """Return animations that paint visuals to match each cell's .alive flag."""
         anims = []
-        for r in range(self.rows):
-            for c in range(self.cols):
-                cell = self.cells[self.idx(r, c)]
-                if getattr(cell, "alive", False):
-                    anims.append(cell.animate.set_fill(self.on_color, 1.0)
-                                 .set_stroke(self.stroke_color, self.stroke_width))
-                else:
-                    anims.append(cell.animate.set_fill(self.off_color, 0.0)
-                                 .set_stroke(self.stroke_color, self.stroke_width))
+        for i in range(self.rows * self.cols):
+            cell = self.cells[i]
+            if getattr(cell, "alive", False):
+                anims.append(
+                    cell.animate
+                        .set_fill(self.on_color, 1.0)
+                        .set_stroke(self.stroke_color, self.stroke_width)
+                )
+            else:
+                anims.append(
+                    cell.animate
+                        .set_fill(self.off_color, 0.0)
+                        .set_stroke(self.stroke_color, self.stroke_width)
+                )
         return anims
 
     def render_cells_immediate(self):
         """Apply visuals immediately (no animation)."""
-        for r in range(self.rows):
-            for c in range(self.cols):
-                cell = self.cells[self.idx(r, c)]
-                if getattr(cell, "alive", False):
-                    cell.set_fill(self.on_color, 1.0).set_stroke(self.stroke_color, self.stroke_width)
-                else:
-                    cell.set_fill(self.off_color, 0.0).set_stroke(self.stroke_color, self.stroke_width)
+        for i in range(self.rows * self.cols):
+            cell = self.cells[i]
+            if getattr(cell, "alive", False):
+                cell.set_fill(self.on_color, 1.0).set_stroke(self.stroke_color, self.stroke_width)
+            else:
+                cell.set_fill(self.off_color, 0.0).set_stroke(self.stroke_color, self.stroke_width)
         return self
 
     # --- rules ---
@@ -111,7 +134,7 @@ class CellularAutomatonGrid(VGroup):
         """
         Set the local update rule.
 
-        neighborhood: tuple of relative (dr, dc) offsets. Order is preserved.
+        neighborhood: tuple of relative (dx, dy) offsets. Order is preserved.
         rule: function that receives a tuple[bool,...] with the neighborhood
               states in the SAME ORDER and returns True (alive) / False (dead).
         """
@@ -119,17 +142,18 @@ class CellularAutomatonGrid(VGroup):
         self._rule = rule
         return self
 
-    def _alive_in_bounds(self, r: int, c: int) -> bool:
-        if r < 0 or r >= self.rows or c < 0 or c >= self.cols:
+    def _alive_in_bounds(self, x: int, y: int) -> bool:
+        idx = self.xy_to_index(x, y)
+        if idx == -1:
             return False
-        return bool(getattr(self.cells[self.idx(r, c)], "alive", False))
+        return bool(getattr(self.cells[idx], "alive", False))
 
-    def _neighborhood_bits(self, r: int, c: int) -> tuple[bool, ...]:
+    def _neighborhood_bits(self, x: int, y: int) -> tuple[bool, ...]:
         if not self._neighborhood:
             return tuple()
         bits: list[bool] = []
-        for dr, dc in self._neighborhood:
-            bits.append(self._alive_in_bounds(r + dr, c + dc))
+        for dx, dy in self._neighborhood:
+            bits.append(self._alive_in_bounds(x + dx, y + dy))
         return tuple(bits)
 
     def step(self):
@@ -141,26 +165,31 @@ class CellularAutomatonGrid(VGroup):
         if not (self._neighborhood and self._rule):
             return self
 
-        new_flags = [[False] * self.cols for _ in range(self.rows)]
-        for r in range(self.rows):
-            for c in range(self.cols):
-                bits = self._neighborhood_bits(r, c)
-                new_flags[r][c] = bool(self._rule(bits))
+        total = self.rows * self.cols
+        new_flags = [False] * total
 
-        for r in range(self.rows):
-            for c in range(self.cols):
-                self.cells[self.idx(r, c)].alive = new_flags[r][c]
+        # compute next flags
+        for i in range(total):
+            x, y = self.index_to_xy(i)
+            bits = self._neighborhood_bits(x, y)
+            new_flags[i] = bool(self._rule(bits))
+
+        # commit
+        for i in range(total):
+            self.cells[i].alive = new_flags[i]
 
         return self
 
     def set_life_rule(self):
         """
         Convenience: Conway's Game of Life (B3/S23) with the Moore neighborhood.
-        Neighborhood order (tuples are RELATIVE to each cell, order defines rule input):
-            (0, 0),          # center (the cell itself)
-            (-1, -1), (-1, 0), (-1, 1),
-            ( 0, -1),         ( 0, 1),
-            ( 1, -1), ( 1, 0), ( 1, 1)
+        Coordinate convention: x right+, y up+, (0,0) is center.
+
+        Neighborhood order (dx, dy) relative to each cell (order defines rule input):
+            (0, 0),            # center (the cell itself)
+            (-1,  1), (0,  1), (1,  1),   # above row (up)
+            (-1,  0),          (1,  0),   # left / right
+            (-1, -1), (0, -1), (1, -1)    # below row (down)
 
         The rule receives a tuple[bool,...] in that order:
           bits[0] = current cell alive?
@@ -168,9 +197,9 @@ class CellularAutomatonGrid(VGroup):
         """
         neighborhood = (
             (0, 0),
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1),           (0, 1),
-            (1, -1),  (1, 0),  (1, 1),
+            (-1,  1), (0,  1), (1,  1),
+            (-1,  0),          (1,  0),
+            (-1, -1), (0, -1), (1, -1),
         )
 
         def life(bits: tuple[bool, ...]) -> bool:

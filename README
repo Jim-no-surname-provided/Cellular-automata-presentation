@@ -5,7 +5,7 @@ If you modify the requirements.in, run
 to update requirements.txt, and then
     pip install -r requirements.txt
 
-To compile the Slides to videos use
+To compile the Slides to videos and then slides use
     manim-slides render app/main.py Main
 or, if you have many sub-mobjects,
     manim-slides render app/main.py Main --disable_caching
@@ -13,3 +13,7 @@ or, if you have many sub-mobjects,
 
 To run the Slides in a slideshow use
     manim-slides Main
+
+To convert the slides and videos into an .html, you want to use
+    manim-slides convert SCENE scene.html -ccontrols=true
+unless you don't want the controls at the bottom
