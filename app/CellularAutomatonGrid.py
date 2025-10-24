@@ -65,6 +65,10 @@ class CellularAutomatonGrid(VGroup):
         x = col - (self.cols // 2)
         return (x, y)
 
+    # -- normal getters --
+    def get_cell(self, x, y):
+        return self.cells[self.xy_to_index(x, y)]
+
     # --- state accessors ---
     def is_alive(self, x: int, y: int) -> bool:
         idx = self.xy_to_index(x, y)
@@ -156,6 +160,50 @@ class CellularAutomatonGrid(VGroup):
             bits.append(self._alive_in_bounds(x + dx, y + dy))
         return tuple(bits)
 
+    # --- neighbors APIs ---
+    def neighbor_coords_of(
+        self,
+        x: int,
+        y: int,
+        *,
+        include_center: bool = False,
+        in_bounds_only: bool = True,
+    ) -> list[tuple[int, int]]:
+        """
+        Return neighbor coordinates translated from (x, y) using the current neighborhood.
+
+        include_center: if False, (0,0) offset is excluded (common for CA rules).
+        in_bounds_only: if True, clips to grid; if False, returns off-grid coords too.
+        """
+        if not self._neighborhood:
+            return []
+
+        coords: list[tuple[int, int]] = []
+        for dx, dy in self._neighborhood:
+            if not include_center and dx == 0 and dy == 0:
+                continue
+            nx, ny = x + dx, y + dy
+            if in_bounds_only:
+                if self.xy_to_index(nx, ny) >= 0:
+                    coords.append((nx, ny))
+            else:
+                coords.append((nx, ny))
+        return coords
+
+    def neighbors_of(
+        self,
+        x: int,
+        y: int,
+        *,
+        include_center: bool = False,
+    ) -> list[Mobject]:
+        """
+        Return the *cell objects* for neighbors of (x, y), filtered to in-bounds cells.
+        By default excludes the center (0,0) offset.
+        """
+        coords = self.neighbor_coords_of(x, y, include_center=include_center, in_bounds_only=True)
+        return [self.cells[self.xy_to_index(nx, ny)] for (nx, ny) in coords]
+
     def step(self):
         """
         Apply the stored rule once to ALL cells, mutating only the per-cell flags.
@@ -179,32 +227,3 @@ class CellularAutomatonGrid(VGroup):
             self.cells[i].alive = new_flags[i]
 
         return self
-
-    def set_life_rule(self):
-        """
-        Convenience: Conway's Game of Life (B3/S23) with the Moore neighborhood.
-        Coordinate convention: x right+, y up+, (0,0) is center.
-
-        Neighborhood order (dx, dy) relative to each cell (order defines rule input):
-            (0, 0),            # center (the cell itself)
-            (-1,  1), (0,  1), (1,  1),   # above row (up)
-            (-1,  0),          (1,  0),   # left / right
-            (-1, -1), (0, -1), (1, -1)    # below row (down)
-
-        The rule receives a tuple[bool,...] in that order:
-          bits[0] = current cell alive?
-          sum(bits[1:]) = number of alive neighbors
-        """
-        neighborhood = (
-            (0, 0),
-            (-1,  1), (0,  1), (1,  1),
-            (-1,  0),          (1,  0),
-            (-1, -1), (0, -1), (1, -1),
-        )
-
-        def life(bits: tuple[bool, ...]) -> bool:
-            current = bits[0]
-            n = sum(bits[1:])
-            return (current and (n in (2, 3))) or ((not current) and (n == 3))
-
-        return self.set_rule(neighborhood, life)

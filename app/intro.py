@@ -1,13 +1,15 @@
 from manim import *
 from manim_slides import Slide
-from CellularAutomatonGrid import CellularAutomatonGrid
+from GameOfLifeGrid import GameOfLifeGrid
+
+
+ICONS_Z_INDEX = 1
 
 
 def play(slide: Slide):
 
     # Form 5x5 grid in the middle
-    grid = CellularAutomatonGrid(7, 7)
-    grid.set_life_rule()
+    grid = GameOfLifeGrid(7, 7)
     slide.play(LaggedStart(*[Create(c) for c in grid.cells], lag_ratio=0.01))
     slide.next_slide()
 
@@ -28,50 +30,107 @@ def play(slide: Slide):
     # write "Rule as a title on the right"
     rules = Paragraph(
         "Rules",
-        "  1. Any dead cell with three live neighbors becomes alive",
-        "  2. Any live cell with two or three neighbors survives",
+        "  1. Any dead cell with\nthree alive neighbors becomes alive",
+        "  2. Any alive cell with\ntwo or three neighbors survives",
         alignment="left",
         line_spacing=0.6,
+        t2c={
+            "dead": RED,
+            "alive": GREEN,
+            "survives": GREEN,
+        },
     )
-    
-    rules[0].set(weight=BOLD)
-    rules.move_to(RIGHT * (config.frame_width / (6))).scale(0.3)
+
+    rules[0].set(weight=BOLD).scale(1.2)
+    rules.scale(0.6).move_to(RIGHT * 0.5, aligned_edge=LEFT)
 
     for rule in rules[1:]:
-        rule.set_color(GRAY_A)
+        rule.set_opacity(0.7)
 
     slide.play(
         grid.animate.move_to(LEFT * (config.frame_width / (6))),
         Write(rules[0]),
-        Write(rules[1]),
-        Write(rules[2]),
         run_time=1
     )
     slide.next_slide()
 
     # Add the rule "Dead cells with 3 cells become alive" and
-    slide.next_slide()
-
     # Count neighbors around middle cell
+    anims, labels = label_alive_neighbors(grid)
+
+    # Declare skull and smile svgs and actual icon that will appear on screen
+    skull = (
+        SVGMobject("src/skull.svg")
+        .set_fill(WHITE)
+        .set_height(grid.get_cell(0, 0).get_height() * 0.6)
+        .move_to(grid.get_cell(0, 0).get_center())
+        .set_z_index(ICONS_Z_INDEX)
+    )
+    smile = (
+        SVGMobject("src/smile.svg")
+        .set_fill(BLACK)
+        .set_height(grid.get_cell(0, 0).get_height() * 0.6)
+        .move_to(grid.get_cell(0, 0).get_center())
+        .set_z_index(ICONS_Z_INDEX)
+    )
+    icon = skull.copy()
+
+    slide.play(
+        Write(rules[1]),
+        Write(rules[2]),
+        Indicate(grid.get_cell(0, 0), color=BLUE_A),
+        FadeIn(icon, scale=0.3),
+        *anims,
+        run_time=0.5
+    )
     slide.next_slide()
 
     # Update (middle cell should come to life)
-    update_grid()
+    grid.step()
+    slide.play(
+        *disappear_labels_to_center(grid, labels),
+        *grid.render_cells(),
+        Transform(icon, smile),
+        run_time=0.4)
+    slide.play(icon.animate.set_opacity(icon.get_opacity()))
+
+    labels = []
     slide.next_slide()
 
     # Add the rule "Alive cells with 2 or 3 cells stay alive" and
     # Count neighbors around middle cell
+    anims, labels = label_alive_neighbors(grid)
+    slide.play(
+        Write(rules[3]),
+        Write(rules[4]),
+        *anims,
+        run_time=0.5
+    )
     slide.next_slide()
 
     # Update (middle cell should survive)
-    update_grid()
+    grid.step()
+    slide.play(
+        *disappear_labels_to_center(grid, labels),
+        *grid.render_cells(),
+        run_time=0.4)
     slide.next_slide()
 
     # Count neighbors around middle cell
+    anims, labels = label_alive_neighbors(grid)
+    slide.play(
+        *anims,
+        run_time=0.5
+    )
     slide.next_slide()
 
     # Update (middle cell should die)
-    update_grid()
+    grid.step()
+    slide.play(
+        *disappear_labels_to_center(grid, labels),
+        *grid.render_cells(),
+        Transform(icon, skull),
+        run_time=0.4)
     slide.next_slide()
 
     # Let run
@@ -85,6 +144,43 @@ def play(slide: Slide):
     slide.play(FadeIn(conway_group))
     slide.next_slide()
     slide.play(conway_group.animate.scale(0.4).to_corner(UL, buff=0.4))
+
+
+def disappear_labels_to_center(grid, labels):
+    return [
+        label.animate
+        .move_to(grid.get_cell(0, 0).get_center())
+        .scale(0.1)
+        .set_opacity(0)
+        for label in labels
+    ]
+
+
+def label_alive_neighbors(grid):
+    def alive_neighbors_of(x, y):
+        return [
+            cell
+            for cell in grid.neighbors_of(x, y)
+            if cell.alive
+        ]
+
+    anims = []
+    labels = []
+    for i, cell in enumerate(alive_neighbors_of(0, 0), start=1):
+        # tiny number
+        num_label = Text(str(i)).scale(0.3)
+        num_label.move_to(cell.get_center())
+
+        # cell.add(num_label)  # attach to this cell
+        num_label.set_z_index(ICONS_Z_INDEX)
+
+        # store in a list to eliminate later
+        labels.append(num_label)
+        # tint that cell
+        anims.append(cell.animate.set_fill(PINK))
+        # make it appear nicely
+        anims.append(Write(num_label))
+    return anims, labels
 
 
 def conway(target_width_percentage):
