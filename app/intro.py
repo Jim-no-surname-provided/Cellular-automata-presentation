@@ -7,6 +7,10 @@ ICONS_Z_INDEX = 1
 
 
 def play(slide: Slide):
+    rules_explanation(slide)
+
+
+def rules_explanation(slide: Slide):
 
     # Form 5x5 grid in the middle
     grid = GameOfLifeGrid(7, 7)
@@ -113,6 +117,7 @@ def play(slide: Slide):
     slide.play(
         *disappear_labels_to_center(grid, labels),
         *grid.render_cells(),
+        Indicate(icon),
         run_time=0.4)
     slide.next_slide()
 
