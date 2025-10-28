@@ -10,9 +10,5 @@ if (-not (Test-Path ".venv")) {
 pip install --upgrade pip
 pip install pip-tools
 
-# If requirements.txt exists, install from it
-if (Test-Path "requirements.txt") {
-    pip-sync requirements.txt
-} else {
-    pip-compile requirements.in
-}
+pip-compile requirements.in
+pip-sync requirements.txt
