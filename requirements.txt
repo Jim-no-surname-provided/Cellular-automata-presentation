@@ -98,7 +98,10 @@ numpy==2.3.2
     #   manim-slides
     #   mapbox-earcut
     #   moderngl-window
+    #   opencv-python
     #   scipy
+opencv-python==4.11.0.86
+    # via -r requirements.in
 packaging==25.0
     # via
     #   build

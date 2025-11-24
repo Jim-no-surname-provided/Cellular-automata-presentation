@@ -1,19 +1,13 @@
 from manim import *
-from manim_slides import Slide, ThreeDSlide
-from title import play as title
-from intro import play as intro
+from manim_slides import Slide
+from intro import Intro
+from title import Title 
+from formal_definition import Formal_Def 
 
 
 class Main(Slide):
     def construct(self):
-        # ! Commented during work since it takes a long time to compile
-        title(self)
-        intro(self)
-        self.game_of_life()
-        self.community_achievements()
-
-    def game_of_life(self):
-        pass
-
-    def community_achievements(self):
-        pass
+        Title()
+        Intro()
+        Formal_Def()
+        

@@ -12,7 +12,7 @@ class CellularAutomatonGrid(VGroup):
         stroke_color=WHITE,
         stroke_width: float = 1.0,
         off_color=BLACK,
-        on_color=YELLOW,
+        on_color=WHITE,
         neighborhood: tuple[tuple[int, int], ...] | None = None,
         rule: "Callable[[tuple[bool, ...]], bool] | None" = None,
     ):

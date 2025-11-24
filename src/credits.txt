@@ -3,3 +3,9 @@ https://www.svgrepo.com/svg/532354/face-smile
 
 Skull svg vector:
 https://www.svgrepo.com/svg/510199/skull 
+
+GoL cpu:
+https://github.com/nicolasloizeau/scalable-gol-computer
+
+Growing Neural Cellular Automata:
+https://distill.pub/2020/growing-ca/

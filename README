@@ -1,19 +1,45 @@
-To install the venv with its dependencies run setup.ps1
+# Setup & Usage
 
-If you modify the requirements.in, run
-    pip-compile requirements.in
-to update requirements.txt, and then
-    pip install -r requirements.txt
+### Installation
+To install the virtual environment with its dependencies, run:
+```powershell
+setup.ps1
+```
 
-To compile the Slides to videos and then slides use
-    manim-slides render app/main.py Main
-or, if you have many sub-mobjects,
-    manim-slides render app/main.py Main --disable_caching
+If you modify `requirements.in`, update dependencies with:
+```bash
+pip-compile requirements.in
+```
+Then install them with:
+```bash
+pip install -r requirements.txt
+```
 
+---
 
-To run the Slides in a slideshow use
-    manim-slides Main
+### Rendering Slides
+To compile the videos and then slides, use:
+```bash
+manim-slides render app/main.py Main
+```
+If your scene contains many sub-mobjects, disable caching:
+```bash
+manim-slides render app/main.py Main --disable_caching
+```
 
-To convert the slides and videos into an .html, you want to use
-    manim-slides convert SCENE scene.html -ccontrols=true
-unless you don't want the controls at the bottom
+---
+
+### Running the Slideshow
+Run the slides interactively with:
+```bash
+manim-slides Main
+```
+
+---
+
+### Exporting to HTML
+Convert slides and videos into an `.html` file with:
+```bash
+manim-slides convert SCENE scene.html -ccontrols=true
+```
+Omit `-ccontrols=true` if you don’t want the playback controls at the bottom.
