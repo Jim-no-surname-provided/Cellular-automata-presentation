@@ -10,6 +10,7 @@ class Formal_Def(Slide):
 
     THIRD_UP = UP*config.frame_height*(1/6)
     THIRD_DOWN = DOWN*config.frame_height*(1/6)
+    TOP = (config.frame_height/2)*UP
 
     FOCUS_LETTER_SCALE = 1.4
 
@@ -23,8 +24,7 @@ class Formal_Def(Slide):
         self.neighborhood_index()
 
         self.global_map()
-
-        self.play(FadeOut(Group(*self.mobjects)))
+        self.wait(1e-9)
 
     def intro(self):
         expr = MathTex(
@@ -41,7 +41,7 @@ class Formal_Def(Slide):
         )
         self.expr = expr
         self.example = example
-        self.example.match_height(self.expr).scale(1/self.FOCUS_LETTER_SCALE).to_corner(DL, buff=0.6)
+        self.example.scale(1.3).to_corner(DL, buff=0.6)
         self.next_slide()
 
     def focus_letter_animation(self, L):
@@ -58,7 +58,7 @@ class Formal_Def(Slide):
 
     def update_example(self, A, Zd, X, tau):
         tex = fr"({A}, {Zd}, {X}, {tau})"
-        new = MathTex(tex).match_height(self.example)
+        new = MathTex(tex).scale(1.3)
         new.to_corner(DL, buff=0.6)
         self.play(Transform(self.example, new), run_time=0.4)
 
@@ -148,6 +148,7 @@ class Formal_Def(Slide):
             LaggedStart(*[GrowArrow(arr) for arr in arrows], lag_ratio=0.25),
             run_time=0.4
         )
+        self.wait(1e-9)
 
         self.next_slide()
         self.play(
@@ -474,7 +475,7 @@ class Formal_Def(Slide):
     def scopes(self):
         # First tape
         g1 = self.tape(1)
-        g1.grid.get_cell(-1, 0).set_stroke(color=WHITE).set_z_index(0).set_fill(BLACK, 0.0)
+        g1.grid.get_cell(0, 0).set_stroke(color=WHITE).set_z_index(0).set_fill(BLACK, 0.0)
 
         # Create only grid
         self.play(Create(g1.grid), run_time=0.4)
@@ -496,14 +497,23 @@ class Formal_Def(Slide):
         self.wait(1e-9)
         self.next_slide()
 
+        tapes = [g1] + [self.tape(i) for i in range(2, 5)]
+
         self.play(
             *[Create(m)
-              for i in range(2, 5)
-              for m in self.tape(i).submobjects],
+              for t in tapes[1:]
+              for m in t.submobjects],
             run_time=0.4
         )
         self.wait(1e-9)
         self.next_slide()
+
+        self.play(
+            *[Uncreate(m)
+              for t in tapes
+              for m in t.submobjects],
+            run_time=0.4
+        )
 
     def tape(self, N):
         cell_size = config.frame_height / 12
@@ -529,7 +539,9 @@ class Formal_Def(Slide):
         )
 
         # Color yellow and index 1
-        for i in range(-1, N-1):
+        start = -1 if not N == 1 else 0
+        end = start + N
+        for i in range(start, end):
             (grid
              .get_cell(i, 0)
              .set_stroke(color=YELLOW)
@@ -549,4 +561,144 @@ class Formal_Def(Slide):
         return group
 
     def global_map(self):
-        self.update_example(r"\mathbb{B}", r"\mathbb{Z}^1", r"Scope 3", r"\tau")
+        tau = self.expr.get_part_by_tex(r"\tau")
+        self.play(
+            self.unfocus_letter_animation(self.X),
+            self.focus_letter_animation(tau),
+            run_time=0.4
+        )
+        self.next_slide()
+
+        useable_space = config.frame_height - self.expr.get_height()*1.4
+
+        sigma = self.sigma(useable_space)
+
+        tau, arrow, blob = self.tau(useable_space, sigma)
+
+        # Prepare for next slide
+        self.play(
+            Uncreate(sigma),
+            Uncreate(tau),
+            Uncreate(self.expr),
+            Uncreate(arrow),
+            Uncreate(blob),
+            Transform(
+                self.example,
+                MathTex(
+                    r"(\mathbb{B}, \mathbb{Z}^1, Scope 3, \_)"
+                )
+                .scale(0.8)
+                .to_corner(DL, buff=0.3)
+            )
+        )
+
+    def sigma(self, useable_space):
+        # sigma : A^|X| -> A
+        sigma = (
+            MathTex(
+                r"\sigma: A^{|X|}\to A",
+            )
+            .scale(1.3)
+            .move_to(self.TOP + DOWN*useable_space/3)
+        )
+        self.play(Write(sigma))
+        self.next_slide()
+
+        # tapes with arrows
+        tape_0 = self.tape(3)
+        tape_1 = self.tape(1).next_to(tape_0, direction=DOWN, buff=MED_LARGE_BUFF)
+        VGroup(tape_0, tape_1).move_to(self.TOP + DOWN*useable_space*2/3)
+
+        self.play(
+            Create(tape_0.grid),
+            Create(tape_1.grid),
+            run_time=0.4
+        )
+
+        arrows = [
+            Arrow(
+                start=tape_0.grid.get_cell(i, 0).get_bottom(),
+                end=tape_1.grid.get_cell(0,  0).get_top(),
+                buff=0.07*tape_0.grid.cell_size,
+                stroke_color=YELLOW,
+                stroke_width=2,
+                tip_length=0.08,
+            )
+            for i in [-1, 0, 1]
+        ]
+
+        self.play(
+            *[GrowArrow(arr) for arr in arrows]
+        )
+
+        self.wait(1e-9)
+        self.next_slide()
+        self.play(
+            *[Uncreate(arr) for arr in arrows],
+            Uncreate(tape_0.grid),
+            Uncreate(tape_1.grid),
+            run_time=0.4)
+        return sigma
+
+    def tau(self, useable_space, sigma):
+        # tau : A^Z^d -> A^Z^d
+        tau = (
+            MathTex(
+                r"\tau : A^{\mathbb{Z}^d} \to A^{\mathbb{Z}^d",
+            )
+            .scale(1.3)
+            .next_to(sigma, DOWN)
+        )
+        sigma_copy = sigma.copy()
+        VGroup(sigma_copy, tau).move_to(self.TOP + DOWN*useable_space/3)
+
+        self.play(
+            sigma.animate.move_to(sigma_copy.get_center()),
+            Write(tau),
+        )
+
+        self.next_slide()
+
+        # tau : C -> C
+        tau_C = (
+            MathTex(
+                r"\tau : C \to C",
+            )
+            .scale(1.3)
+            .align_to(tau, DOWN)
+        )
+
+        self.play(Transform(tau, tau_C))
+
+        blob = (
+            SVGMobject(r"src/amorphous blob.svg",
+                       stroke_color=WHITE,
+                       fill_color=WHITE,
+                       fill_opacity=0.1,
+                       )
+            .set_height(useable_space/3)
+            .move_to(self.TOP + DOWN*useable_space*2/3)
+        )
+
+        start = blob.get_edge_center(LEFT)
+        end = blob.get_edge_center(RIGHT)
+
+        arrow = CurvedArrow(
+            start_point=start + RIGHT*0.75,
+            end_point=end + LEFT*0.75,
+            angle=45 * DEGREES,    # how much it bends
+            tip_length=0.15,
+            color=YELLOW
+        )
+
+        self.play(
+            Create(blob),
+            run_time=0.4
+        )
+        self.play(
+            Create(arrow),
+            run_time=0.4
+        )
+        self.next_slide()
+
+        return tau, arrow, blob

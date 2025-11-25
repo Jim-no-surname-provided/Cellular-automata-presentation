@@ -12,3 +12,9 @@ https://distill.pub/2020/growing-ca/
 
 Snowflake Growth with a HexCA
 https://itp.uni-frankfurt.de/~gros/StudentProjects/Projects_2020/projekt_yan_huck/
+
+Einstein Hat GoL
+https://github.com/henrypdonahue/EinstiensHat-GoL
+
+Amorphous set svg
+https://www.vecteezy.com/vector-art/5435538-abstract-liquid-organic-black-irregular-blotch-shapes-flat-style-design-fluid-vector-illustration-set
