@@ -38,7 +38,7 @@ class GameOfLifeGrid(CellularAutomatonGrid):
         self.set_rule(self.MOORE_9, self._life_rule)
 
     @staticmethod
-    def _life_rule(bits: tuple[bool, ...]) -> bool:
+    def _life_rule(bits: tuple[bool, ...], *params) -> bool:
         """B3/S23: survive with 2 or 3, birth with exactly 3."""
         current = bits[0]
         n = sum(bits[1:])

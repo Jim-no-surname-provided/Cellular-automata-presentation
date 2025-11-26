@@ -146,11 +146,11 @@ class Intro(Slide):
         cpu = VideoMobject(r"src\cpu recordings\sine_cpu.mp4")
         display = VideoMobject(r"src\cpu recordings\sine_display.mp4")
         gliders = VideoMobject(r"src\cpu recordings\gliders.mp4", loop=True)
-        cpu_credits = Text(
-            "@nicolasloizeau on github",
-            font_size=22,
+        cpu_credits = MathTex(
+            r"\text{@nicolasloizeau on github}",
+            font_size=10,
             color=GREY_B,
-        ).to_corner(DR, buff=0.3).set_z_index(9999)
+        ).to_corner(UR, buff=0.1).set_z_index(9999)
 
         cpu.move_to(np.array([0.1, 0.0, 0.0])).set_height(8.0)
         display.move_to(np.array([4.0, -2.6, 0.0])).set_height(1.0).set_opacity(0)
@@ -172,7 +172,11 @@ class Intro(Slide):
             run_time=1.2,
             rate_func=smooth
         )
-        self.wait(240)
+        if config.quality == "low_quality":
+            self.wait(2)
+        else:
+            self.wait(240)
+
         self.next_slide()
         self.play(
             FadeOut(cpu),
@@ -180,6 +184,8 @@ class Intro(Slide):
             FadeOut(gliders),
             FadeOut(cpu_credits),
         )
+        self.remove(gliders)
+        self.wait(1e-9)
 
     def disappear_labels_to_center(self, grid, labels):
         return [

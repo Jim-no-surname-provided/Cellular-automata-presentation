@@ -10,6 +10,7 @@ class CellularAutomatonGrid(VGroup):
         cell_size: float = 0.6,
         buff: float = 0.0,                    # tight lattice by default
         stroke_color=WHITE,
+        stroke_opacity=1,
         stroke_width: float = 1.0,
         off_color=BLACK,
         on_color=WHITE,
@@ -40,12 +41,15 @@ class CellularAutomatonGrid(VGroup):
 
         # Build grid (stored flat, row-major, top-to-bottom)
         self.cells = VGroup(*[Square(side_length=cell_size) for _ in range(rows * cols)])
-        self.cells.set_stroke(stroke_color, stroke_width).set_fill(off_color, 0.0)
+        self.cells.set_stroke(stroke_color, stroke_width, opacity=stroke_opacity).set_fill(off_color, 0.0)
         self.cells.arrange_in_grid(rows=rows, cols=cols, buff=buff, center=True)
         self.add(self.cells)
 
         # Memory flags (per cell)
-        for cell in self.cells:
+        for i, cell in enumerate(self.cells):
+            x, y = self.index_to_xy(i)
+            cell.x = x
+            cell.y = y
             cell.alive = False
 
     # --- coordinate conversion (centered x,y) ---
@@ -96,7 +100,7 @@ class CellularAutomatonGrid(VGroup):
             if idx != -1:
                 self.cells[idx].alive = bool(alive)
             return self
-
+        
         raise TypeError("set_alive expects either (x, y, alive=True) or a set of (x,y) tuples.")
 
     # --- rendering ---
@@ -220,7 +224,7 @@ class CellularAutomatonGrid(VGroup):
         for i in range(total):
             x, y = self.index_to_xy(i)
             bits = self._neighborhood_bits(x, y)
-            new_flags[i] = bool(self._rule(bits))
+            new_flags[i] = bool(self._rule(bits, self.get_cell(x, y)))
 
         # commit
         for i in range(total):

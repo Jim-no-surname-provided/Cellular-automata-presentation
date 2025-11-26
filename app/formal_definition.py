@@ -94,6 +94,12 @@ class Formal_Def(Slide):
         neural_ca_g = Group(neural_ca, SurroundingRectangle(neural_ca))
 
         self.add(neural_ca_g)
+        credits_tex = MathTex(
+            r"\text{Growing NCA (Mordvintsev et al., 2020, Distill)}",
+            font_size=10,
+            color=GREY_B,
+        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        self.play(FadeIn(credits_tex))
         self.wait(24)
         self.next_slide()
 
@@ -158,6 +164,7 @@ class Formal_Def(Slide):
               ],
             Uncreate(vec),
             FadeOut(neural_ca_g),
+            FadeOut(credits_tex),
             run_time=0.5
         )
         self.remove(*arrows)
@@ -219,6 +226,12 @@ class Formal_Def(Slide):
         ).set_height(2*config.frame_height/3 - 0.5).move_to(self.THIRD_UP)
 
         self.add(snowflake_growth)
+        credits_tex = MathTex(
+            r"\text{Yan Huck at ITP, Frankfurt}",
+            font_size=10,
+            color=GREY_B,
+        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        self.play(FadeIn(credits_tex))
 
         self.wait(30)
         self.next_slide()
@@ -253,10 +266,12 @@ class Formal_Def(Slide):
                    angle=angle),
             run_time=0.4
         )
+        self.wait(1)
         self.next_slide()
 
         self.play(
             FadeOut(snowflake_growth),
+            FadeOut(credits_tex),
             Uncreate(cube), run_time=0.4
         )
 
@@ -281,6 +296,12 @@ class Formal_Def(Slide):
 
         einstein_hat_g = Group(einstein_hat, SurroundingRectangle(einstein_hat))
 
+        credits_tex = MathTex(
+            r"\text{@henrypdonahue on Github}",
+            font_size=10,
+            color=GREY_B,
+        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        self.play(FadeIn(credits_tex))
         self.add(einstein_hat_g)
         self.wait(1e-9)
         self.next_slide()
@@ -298,6 +319,7 @@ class Formal_Def(Slide):
         self.wait(10)
         self.next_slide()
         self.remove(einstein_hat_oscillator_g)
+        self.play(FadeOut(credits_tex), run_time=0.4)
 
     def neighborhood_index(self):
         self.X = self.expr.get_part_by_tex("X")

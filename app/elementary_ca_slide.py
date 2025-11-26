@@ -2,7 +2,7 @@ from manim import *
 from manim_slides import Slide
 
 
-class Elementary_CA(Slide):
+class Elementary_CA_Slide(Slide):
 
     FIRST_THIRD = UP*config.frame_height*(1/6)
     SECOND_THIRD = DOWN*config.frame_height*(1/6)
@@ -17,6 +17,9 @@ class Elementary_CA(Slide):
         self.animate_sigma_randomization(table.S_col, 25)
         self.next_slide()
         self.transform_to_wolfram_number(table)
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
 
     def truth_table(self):
         # Columns
@@ -178,7 +181,7 @@ class Elementary_CA(Slide):
             .align_to(scheme_tex, LEFT)
         )
         scheme_110 = (
-            MathTex(r"0110 1110 \rightarrow 90", font_size=32)
+            MathTex(r"0110 1110 \rightarrow 110", font_size=32)
             .next_to(scheme_90, DOWN)
             .align_to(scheme_tex, LEFT)
         )
@@ -206,11 +209,9 @@ class Elementary_CA(Slide):
                 )
             )
             anims.append(MaintainPositionRelativeTo(l, pivot))
-            anims.append(l.animate.match_height(scheme_tex[i]))
 
         self.play(
-            *anims,
-            run_time=0.4
+            *anims
         )
         self.wait(0.1)
         self.next_slide()
