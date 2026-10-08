@@ -1,5 +1,6 @@
+from collections.abc import Callable
+
 from manim import *
-from typing import Callable
 
 
 class CellularAutomatonGrid(VGroup):

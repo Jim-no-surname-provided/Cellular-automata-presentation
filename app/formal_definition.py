@@ -11,6 +11,7 @@ class Formal_Def(Slide):
     THIRD_UP = UP*config.frame_height*(1/6)
     THIRD_DOWN = DOWN*config.frame_height*(1/6)
     TOP = (config.frame_height/2)*UP
+    EINSTEIN_HAT_FILE = r"src\CA examples\Quick einstein hat GoL.mp4"
 
     FOCUS_LETTER_SCALE = 1.4
 
@@ -291,7 +292,7 @@ class Formal_Def(Slide):
 
     def einstein_hat(self):
         einstein_hat = VideoMobject(
-            r"src\CA examples\Quick einstein hat GoL.mp4"
+            self.EINSTEIN_HAT_FILE
         ).set_height(2*config.frame_height/3 - 0.5).move_to(self.THIRD_UP)
 
         einstein_hat_g = Group(einstein_hat, SurroundingRectangle(einstein_hat))
@@ -724,3 +725,7 @@ class Formal_Def(Slide):
         self.next_slide()
 
         return tau, arrow, blob
+
+
+class Formal_Def_Mai(Formal_Def):
+    EINSTEIN_HAT_FILE = r"src\CA examples\Mai einstein hat GoL.mp4"

@@ -33,6 +33,7 @@ manim-slides render app/main.py Main --disable_caching
 Run the slides interactively with:
 ```bash
 manim-slides  Title Intro Formal_Def Elementary_CA_Slide Rules_90_110
+manim-slides  Title Intro Formal_Def_Mai Elementary_CA_Slide Rules_90_110
 ```
 
 ---
@@ -41,5 +42,6 @@ manim-slides  Title Intro Formal_Def Elementary_CA_Slide Rules_90_110
 Convert slides and videos into an `.html` file with:
 ```bash
 manim-slides convert SCENE scene.html -ccontrols=true
+manim-slides convert Title Intro Formal_Def_Mai Elementary_CA_Slide Rules_90_110 presentation.html -ccontrols=true
 ```
 Omit `-ccontrols=true` if you don’t want the playback controls at the bottom.
