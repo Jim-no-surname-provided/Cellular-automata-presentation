@@ -1,5 +1,7 @@
-from manim import *
 from CellularAutomatonGrid import CellularAutomatonGrid
+from manim import *
+
+# pyright: reportAttributeAccessIssue=false
 
 
 class ElementaryCA(CellularAutomatonGrid):
@@ -34,8 +36,20 @@ class ElementaryCA(CellularAutomatonGrid):
 
     def set_primitive_configuration(self, x=0):
         """Place a single live cell at the center or x of the top row."""
-        init = {(x, self._top_y)}
-        self.set_alive(init)
+        self.set_alive(x, self._top_y)
+        
+    def set_initial_configuration(self, c: str):
+        """It sets c as an initial configuration, starting at x=-len(c)/2
+
+        Args:
+            c (str): a string of 0s and 1s containing the cells that should be alive and death
+
+            
+        """
+        for x, b in zip(range(-len(c)//2, (len(c)+1)//2), c):
+            if b == "1":
+                self.set_alive(x, self._top_y)
+        
 
     def step(self):
         """
@@ -43,6 +57,9 @@ class ElementaryCA(CellularAutomatonGrid):
         Keeps the top row frozen, because that is the initial state.
         Only calculates a row each time to avoid unnecesary computations
         """
+        
+        if self._rule is None:
+            raise ValueError("_rule is None")
 
         if self._current_y <= -self.rows/2:
             return self

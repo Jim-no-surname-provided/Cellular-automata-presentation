@@ -1,7 +1,8 @@
 from GameOfLifeGrid import GameOfLifeGrid
-from manim import * # pyright: ignore[reportWildcardImportFromLibrary]
+from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
 from manim_slides.slide import Slide
-from video_mobject_opencv import VideoMobject
+
+from app.VideoMobject import VideoMobject
 
 ICONS_Z_INDEX = 1
 
@@ -15,6 +16,7 @@ class Intro(Slide):
         grid = GameOfLifeGrid(7, 7)
         self.play(LaggedStart(*[Create(c) for c in grid.cells], lag_ratio=0.01))
         self.next_slide()
+
         def update_grid():
             grid.step()
             self.play(*grid.render_cells(), run_time=0.4)

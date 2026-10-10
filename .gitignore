@@ -96,7 +96,7 @@ Desktop.ini
 # .idea/
 
 # manim-slides
-slides/
+/slides/
 out/
 media/
 positioning aids/

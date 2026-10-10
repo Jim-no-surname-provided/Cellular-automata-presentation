@@ -1,9 +1,11 @@
 import random
-from manim import *
-from manim_slides import Slide
-from video_mobject_opencv import VideoMobject
+
 from BlockCA import BlockCA
 from CellularAutomatonGrid import CellularAutomatonGrid
+from manim import *
+from manim_slides.slide import Slide
+
+from app.VideoMobject import VideoMobject
 
 
 class Formal_Def(Slide):
@@ -155,7 +157,6 @@ class Formal_Def(Slide):
             LaggedStart(*[GrowArrow(arr) for arr in arrows], lag_ratio=0.25),
             run_time=0.4
         )
-        self.wait(1e-9)
 
         self.next_slide()
         self.play(
@@ -188,7 +189,7 @@ class Formal_Def(Slide):
         }
 
         grid.set_alive(alive_coords)
-        grid.render_cells_immediate()
+        grid.update_cell_colors()
 
         # Position it at THIRD_UP
         grid.move_to(self.THIRD_UP*0.5)
@@ -196,7 +197,6 @@ class Formal_Def(Slide):
         self.play(
             Create(grid),
             run_time=0.4)
-        self.wait(1e-9)
         self.next_slide()
         h0 = grid.cells[0].get_height()
         gap = 0.2
@@ -267,7 +267,6 @@ class Formal_Def(Slide):
                    angle=angle),
             run_time=0.4
         )
-        self.wait(1)
         self.next_slide()
 
         self.play(
@@ -304,7 +303,6 @@ class Formal_Def(Slide):
         ).to_corner(UR, buff=0.1).set_z_index(9999)
         self.play(FadeIn(credits_tex))
         self.add(einstein_hat_g)
-        self.wait(1e-9)
         self.next_slide()
         self.wait(30)
         self.next_slide()
@@ -315,7 +313,6 @@ class Formal_Def(Slide):
         ).set_height(2*config.frame_height/3 - 0.5).move_to(self.THIRD_UP)
         einstein_hat_oscillator_g = Group(einstein_hat_oscillator, SurroundingRectangle(einstein_hat_oscillator))
         self.add(einstein_hat_oscillator_g)
-        self.wait(1e-9)
         self.next_slide()
         self.wait(10)
         self.next_slide()
@@ -482,7 +479,7 @@ class Formal_Def(Slide):
             )
         return arrows
 
-    def _arrow_targets(self, arrows, underscores, target_y, scale=1):
+    def _arrow_targets(self, arrows, underscores, target_y, scale=1.0):
         """Arrow targets for moving arrows to the underscore positions."""
         targets = VGroup()
 
@@ -502,7 +499,6 @@ class Formal_Def(Slide):
 
         # Create only grid
         self.play(Create(g1.grid), run_time=0.4)
-        self.wait(1e-9)
         self.next_slide()
 
         # animate text + smile
@@ -517,7 +513,6 @@ class Formal_Def(Slide):
             .set_stroke(color=YELLOW),
             run_time=0.4,
         )
-        self.wait(1e-9)
         self.next_slide()
 
         tapes = [g1] + [self.tape(i) for i in range(2, 5)]
@@ -528,7 +523,6 @@ class Formal_Def(Slide):
               for m in t.submobjects],
             run_time=0.4
         )
-        self.wait(1e-9)
         self.next_slide()
 
         self.play(
@@ -654,7 +648,6 @@ class Formal_Def(Slide):
             *[GrowArrow(arr) for arr in arrows]
         )
 
-        self.wait(1e-9)
         self.next_slide()
         self.play(
             *[Uncreate(arr) for arr in arrows],

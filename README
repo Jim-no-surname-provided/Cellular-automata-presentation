@@ -32,8 +32,8 @@ manim-slides render app/main.py Main --disable_caching
 ### Running the Slideshow
 Run the slides interactively with:
 ```bash
-manim-slides  Title Intro Formal_Def Elementary_CA_Slide Rules_90_110
-manim-slides  Title Intro Formal_Def_Mai Elementary_CA_Slide Rules_90_110
+manim-slides  Title Intro Formal_Def Elementary_CA_Slide RulesExamples
+manim-slides  Title Intro Formal_Def_Mai Elementary_CA_Slide RulesExamples
 ```
 
 ---

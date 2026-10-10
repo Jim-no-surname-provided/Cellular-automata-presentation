@@ -1,5 +1,5 @@
 from manim import *
-from manim_slides import Slide
+from manim_slides.slide import Slide
 
 
 class Elementary_CA_Slide(Slide):
@@ -213,7 +213,6 @@ class Elementary_CA_Slide(Slide):
         self.play(
             *anims
         )
-        self.wait(0.1)
         self.next_slide()
         self.play(
             Write(scheme_tex[-1]),
@@ -226,7 +225,6 @@ class Elementary_CA_Slide(Slide):
         self.add(scheme_tex[:-1])
         self.remove(*S_copies)
 
-        self.wait(0.1)
         self.next_slide()
         self.play(
             Write(scheme_90),
@@ -235,7 +233,6 @@ class Elementary_CA_Slide(Slide):
             Transform(table.header_lines[0], table.header_lines[1]),
             run_time=0.4
         )
-        self.wait(0.1)
         self.next_slide()
 
         self.play(
@@ -245,5 +242,4 @@ class Elementary_CA_Slide(Slide):
             Transform(table.header_lines[0], table.header_lines[2]),
             run_time=0.4
         )
-        self.wait(0.1)
         self.next_slide()
