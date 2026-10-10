@@ -1,8 +1,8 @@
-from manim import *
-from manim_slides import Slide
 from GameOfLifeGrid import GameOfLifeGrid
-from debug import *
-from video_mobject_opencv import VideoMobject
+from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
+from manim_slides.slide import Slide
+
+from app.VideoMobject import VideoMobject
 
 ICONS_Z_INDEX = 1
 

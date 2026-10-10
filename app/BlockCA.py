@@ -1,5 +1,5 @@
-from manim import *
 from CellularAutomatonGrid import CellularAutomatonGrid
+from manim import *
 
 
 class BlockCA(CellularAutomatonGrid):

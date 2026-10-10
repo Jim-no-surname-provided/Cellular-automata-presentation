@@ -1,7 +1,6 @@
-# part_title.py
-from manim import *
-from manim_slides import Slide
 import numpy as np
+from manim import *
+from manim_slides.slide import Slide
 from PIL import Image
 
 # --- tunables ---
@@ -14,13 +13,12 @@ STEP_TIME = 0.15
 FADE_STEPS = 10
 
 
-class Title(Slide):
+class TitleSlide(Slide):
     def construct(self):
         """Plays the Cellular Automata title animation on the given Slide."""
         # Step 1: Draw the title
         title = Text(TITLE, weight=BOLD)
         self.play(Write(title))
-        self.wait(0.5)
         self.next_slide()
 
         # Step 2: Rasterize title into a binary mask
@@ -73,7 +71,7 @@ class Title(Slide):
             new_w, new_h = W, max(1, round(W / ar))
         else:
             new_h, new_w = H, max(1, round(H * ar))
-        im_small = im.resize((new_w, new_h), resample=Image.BILINEAR)
+        im_small = im.resize((new_w, new_h), resample=Image.Resampling.BILINEAR)
 
         canvas = Image.new("L", (W, H), color=0)
         off_x = (W - new_w) // 2

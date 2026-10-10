@@ -1,5 +1,9 @@
+from collections.abc import Callable
+
+import numpy as np
 from manim import *
-from typing import Callable
+
+# pyright: reportAttributeAccessIssue=false
 
 
 class CellularAutomatonGrid(VGroup):
@@ -8,14 +12,14 @@ class CellularAutomatonGrid(VGroup):
         rows: int,
         cols: int,
         cell_size: float = 0.6,
-        buff: float = 0.0,                    # tight lattice by default
+        buff: float = 0.0,  # tight lattice by default
         stroke_color=WHITE,
         stroke_opacity=1,
         stroke_width: float = 1.0,
         off_color=BLACK,
         on_color=WHITE,
         neighborhood: tuple[tuple[int, int], ...] | None = None,
-        rule: "Callable[[tuple[bool, ...]], bool] | None" = None,
+        rule: Callable[[tuple[bool, ...], VMobject], bool] | None = None,
     ):
         """
         neighborhood: tuple of tuples with RELATIVE coordinates (dx, dy) to each cell.
@@ -37,11 +41,15 @@ class CellularAutomatonGrid(VGroup):
         self.on_color = on_color
 
         self._neighborhood: tuple[tuple[int, int], ...] | None = neighborhood
-        self._rule = rule
+        self._rule: Callable[[tuple[bool, ...], VMobject], bool] | None = rule
 
         # Build grid (stored flat, row-major, top-to-bottom)
-        self.cells = VGroup(*[Square(side_length=cell_size) for _ in range(rows * cols)])
-        self.cells.set_stroke(stroke_color, stroke_width, opacity=stroke_opacity).set_fill(off_color, 0.0)
+        self.cells = VGroup(
+            *[Square(side_length=cell_size) for _ in range(rows * cols)]
+        )
+        self.cells.set_stroke(
+            stroke_color, stroke_width, opacity=stroke_opacity
+        ).set_fill(off_color, 0.0)
         self.cells.arrange_in_grid(rows=rows, cols=cols, buff=buff, center=True)
         self.add(self.cells)
 
@@ -90,7 +98,7 @@ class CellularAutomatonGrid(VGroup):
             alive_coords = args[0]
             for i in range(self.rows * self.cols):
                 x, y = self.index_to_xy(i)
-                self.cells[i].alive = ((x, y) in alive_coords)
+                self.cells[i].alive = (x, y) in alive_coords
             return self
 
         if len(args) >= 2:
@@ -100,8 +108,10 @@ class CellularAutomatonGrid(VGroup):
             if idx != -1:
                 self.cells[idx].alive = bool(alive)
             return self
-        
-        raise TypeError("set_alive expects either (x, y, alive=True) or a set of (x,y) tuples.")
+
+        raise TypeError(
+            "set_alive expects either (x, y, alive=True) or a set of (x,y) tuples."
+        )
 
     # --- rendering ---
     def render_cells(self):
@@ -111,33 +121,51 @@ class CellularAutomatonGrid(VGroup):
             cell = self.cells[i]
             if getattr(cell, "alive", False):
                 anims.append(
-                    cell.animate
-                        .set_fill(self.on_color, 1.0)
-                        .set_stroke(self.stroke_color, self.stroke_width)
+                    cell.animate.set_fill(self.on_color, 1.0).set_stroke(
+                        self.stroke_color, self.stroke_width
+                    )
                 )
             else:
                 anims.append(
-                    cell.animate
-                        .set_fill(self.off_color, 0.0)
-                        .set_stroke(self.stroke_color, self.stroke_width)
+                    cell.animate.set_fill(self.off_color, 0.0).set_stroke(
+                        self.stroke_color, self.stroke_width
+                    )
                 )
         return anims
 
-    def render_cells_immediate(self):
+    def update_cell_colors(self):
         """Apply visuals immediately (no animation)."""
         for i in range(self.rows * self.cols):
             cell = self.cells[i]
             if getattr(cell, "alive", False):
-                cell.set_fill(self.on_color, 1.0).set_stroke(self.stroke_color, self.stroke_width)
+                cell.set_fill(self.on_color, 1.0).set_stroke(
+                    self.stroke_color, self.stroke_width
+                )
             else:
-                cell.set_fill(self.off_color, 0.0).set_stroke(self.stroke_color, self.stroke_width)
+                cell.set_fill(self.off_color, 0.0).set_stroke(
+                    self.stroke_color, self.stroke_width
+                )
         return self
+
+    def to_image(self):
+        pixels = np.fromiter(
+            (255 if cell.alive else 0 for cell in self.cells),
+            dtype=np.uint8,
+            count=self.rows * self.cols,
+        ).reshape(self.rows, self.cols)
+
+        image = ImageMobject(np.repeat(pixels[:, :, None], 3, axis=2))
+        image.set_resampling_algorithm(RESAMPLING_ALGORITHMS["nearest"])
+
+        image.set_width(self.width)
+        image.move_to(self.get_center())
+        return image
 
     # --- rules ---
     def set_rule(
         self,
         neighborhood: tuple[tuple[int, int], ...],
-        rule: "Callable[[tuple[bool, ...]], bool]",
+        rule: Callable[[tuple[bool, ...], VMobject], bool],
     ):
         """
         Set the local update rule.
@@ -158,7 +186,7 @@ class CellularAutomatonGrid(VGroup):
 
     def _neighborhood_bits(self, x: int, y: int) -> tuple[bool, ...]:
         if not self._neighborhood:
-            return tuple()
+            return ()
         bits: list[bool] = []
         for dx, dy in self._neighborhood:
             bits.append(self._alive_in_bounds(x + dx, y + dy))
@@ -205,7 +233,9 @@ class CellularAutomatonGrid(VGroup):
         Return the *cell objects* for neighbors of (x, y), filtered to in-bounds cells.
         By default excludes the center (0,0) offset.
         """
-        coords = self.neighbor_coords_of(x, y, include_center=include_center, in_bounds_only=True)
+        coords = self.neighbor_coords_of(
+            x, y, include_center=include_center, in_bounds_only=True
+        )
         return [self.cells[self.xy_to_index(nx, ny)] for (nx, ny) in coords]
 
     def step(self):

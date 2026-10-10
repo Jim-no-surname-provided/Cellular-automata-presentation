@@ -1,8 +1,9 @@
-import cv2 # needs opencv-python https://pypi.org/project/opencv-python/
-from PIL import Image, ImageOps
 from dataclasses import dataclass
+
+import cv2  # needs opencv-python https://pypi.org/project/opencv-python/
 from manim import *
-from manim_slides import Slide
+from manim_slides.slide import Slide
+from PIL import Image, ImageOps
 
 
 @dataclass
