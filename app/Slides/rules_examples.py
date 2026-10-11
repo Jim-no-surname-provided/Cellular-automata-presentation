@@ -1,7 +1,11 @@
-from ElementaryCA import ElementaryCA
+import random
+
 from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
 from manim_slides.slide import Slide
 from PIL import Image, ImageFilter
+
+from app.CellularAutomatonGrid import CellularAutomatonGrid
+from app.ElementaryCA import ElementaryCA
 
 
 class RulesExamples(Slide):
@@ -48,6 +52,20 @@ class RulesExamples(Slide):
             rule_n=30,
             cell_size=cell_size,
         )
+        r30_random = ElementaryCA(
+            height,
+            2 * width,
+            rule_n=30,
+            cell_size=cell_size,
+        )
+        r30_shell = ElementaryCA(
+            height,
+            width//3,
+            rule_n=30,
+            cell_size=cell_size,
+            on_color=ManimColor("#B5522D"),
+            off_color=WHITE,
+        )
         r34 = ElementaryCA(
             height,
             width,
@@ -71,8 +89,14 @@ class RulesExamples(Slide):
         r110_collision.set_initial_configuration(
             ether * 45 + glider_A + ether * 3 + glider_Bhat + ether * 45
         )
+        r30_random.set_initial_configuration(
+            "".join(random.choice("01") for _ in range(r30_random.cols))
+        )
+        r30_shell.set_initial_configuration(
+            "".join(random.choice("01") for _ in range(r30_shell.cols))
+        )
 
-        cas = (r90, r110, r110_ether, r110_collision, r30, r34)
+        cas = (r90, r110, r110_ether, r110_collision, r30, r30_random, r30_shell, r34)
 
         # For low quality, make it smaller
         gens = height - 1 if config.quality != "low_quality" else int(0.2 * height)
@@ -99,9 +123,8 @@ class RulesExamples(Slide):
             self.remove(row)
         self.next_slide()
 
-        def render_ca(g, fade_out: bool = True):
-            image = g.to_image()
-
+        def render_ca(r: CellularAutomatonGrid, fade_out: bool = True):
+            image = r.to_image()
             cover = Rectangle(
                 width=image.width,
                 height=image.height,
@@ -127,7 +150,7 @@ class RulesExamples(Slide):
         render_ca(r90)
         img_r110 = render_ca(r110, False)
         img_r110_blurred = self.blur_image(img_r110, radius=1)
-        
+
         self.play(FadeTransform(img_r110, img_r110_blurred))
         self.next_slide()
         self.play(FadeOut(img_r110_blurred))
@@ -135,15 +158,93 @@ class RulesExamples(Slide):
         render_ca(r110_ether)
         img_r110_collision = render_ca(r110_collision, False)
         img_r110_col_blurred = self.blur_image(img_r110_collision, radius=1)
-        
+
         self.play(FadeTransform(img_r110_collision, img_r110_col_blurred))
         self.next_slide()
         self.play(FadeOut(img_r110_col_blurred))
 
         render_ca(r30)
+        render_ca(r30_random)
+
+        self.shell3d()
+
         render_ca(r34)
 
         self.wait(0.1)
+
+    def shell3d(self, eca: ElementaryCA, turns=3, duration=8):
+        width = eca.cols
+        gens = eca.rows
+        max_u = TAU * turns
+
+        # Map CA coordinates onto a growing spiral shell
+        def shell(u, v):
+            radius = 0.25 * np.exp(0.12 * u)
+            tube_radius = 0.45 * radius
+
+            return 2 * np.array([
+                (radius + tube_radius * np.cos(v)) * np.cos(u),
+                (radius + tube_radius * np.cos(v)) * np.sin(u),
+                tube_radius * np.sin(v),
+            ])
+
+        # Create a parametric surface with one face per CA cell
+        surface = Surface(
+            shell,
+            u_range=(0, max_u),
+            v_range=(0, TAU),
+            resolution=(gens, width),
+            checkerboard_colors=False,
+            stroke_width=0,
+            fill_opacity=1,
+        )
+
+        # Color each face according to its corresponding CA cell
+        # TODO: Check whether the CA orientation matches the shell growth direction
+        # Reverse the row or column mapping if necessary
+        for face in surface:
+            row = face.u_index
+            col = face.v_index
+
+            cell = eca.cells[row * width + col]
+            color = eca.on_color if cell.alive else eca.off_color
+
+            face.set_fill(color, opacity=1)
+
+        # Position the shell and configure the 3D camera
+        surface.move_to(ORIGIN)
+
+        self.set_camera_orientation(
+            phi=65 * DEGREES,
+            theta=-45 * DEGREES,
+        )
+
+        self.add(surface)
+
+        # Prepare the growth animation
+        # Group faces by generation, following the u direction
+        rings = [VGroup() for _ in range(gens)]
+
+        for face in surface:
+            rings[face.u_index].add(face)
+
+        # Hide all faces initially without changing their colors
+        for ring in rings:
+            ring.set_opacity(0)
+            
+            
+        # Animate growth by revealing one generation at a time
+        self.play(
+            AnimationGroup(
+                *(ring.animate.set_opacity(1) for ring in rings),
+                lag_ratio=1,
+                run_time=duration,
+                rate_func=linear,
+            )
+        )
+
+        # Finish the slide
+        self.next_slide()
 
     def blur_image(self, image: ImageMobject, radius: float = 3) -> ImageMobject:
         blurred = Image.fromarray(image.pixel_array).filter(

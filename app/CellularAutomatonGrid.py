@@ -147,7 +147,7 @@ class CellularAutomatonGrid(VGroup):
                 )
         return self
 
-    def to_image(self):
+    def to_image(self) -> ImageMobject:
         pixels = np.fromiter(
             (255 if cell.alive else 0 for cell in self.cells),
             dtype=np.uint8,

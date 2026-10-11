@@ -556,7 +556,7 @@ class Formal_Def(Slide):
         )
 
         # Color yellow and index 1
-        start = -1 if not N == 1 else 0
+        start = -1 if N != 1 else 0
         end = start + N
         for i in range(start, end):
             (grid
