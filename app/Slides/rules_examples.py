@@ -1,14 +1,14 @@
 import random
 
 from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
-from manim_slides.slide import Slide
+from manim_slides.slide import ThreeDSlide
 from PIL import Image, ImageFilter
 
 from app.CellularAutomatonGrid import CellularAutomatonGrid
 from app.ElementaryCA import ElementaryCA
 
 
-class RulesExamples(Slide):
+class RulesExamples(ThreeDSlide):
     @property
     def wait_time_between_slides(self) -> float:
         return 0.1
@@ -20,6 +20,7 @@ class RulesExamples(Slide):
 
     def make_rules(self, height, width, cell_size):
         # Create both grids using the helpers
+        print("Creating r90")
         r90 = ElementaryCA(
             height,
             width,
@@ -28,50 +29,58 @@ class RulesExamples(Slide):
             stroke_opacity=0,
             stroke_width=0.0,
         )
+        print("Creating r110")
         r110 = ElementaryCA(
             height,
             width,
             rule_n=110,
             cell_size=cell_size,
         )
+        print("Creating r110_ether")
         r110_ether = ElementaryCA(
             height,
             1271,
             rule_n=110,
             cell_size=cell_size,
         )
+        print("Creating r110_collision")
         r110_collision = ElementaryCA(
             height,
             1347,
             rule_n=110,
             cell_size=cell_size,
         )
+        print("Creating r30")
         r30 = ElementaryCA(
             height,
             width,
             rule_n=30,
             cell_size=cell_size,
         )
+        print("Creating r30_random")
         r30_random = ElementaryCA(
             height,
             2 * width,
             rule_n=30,
             cell_size=cell_size,
         )
+        print("Creating r30_shell")
         r30_shell = ElementaryCA(
             height,
-            width//3,
+            width,
             rule_n=30,
             cell_size=cell_size,
             on_color=ManimColor("#B5522D"),
             off_color=WHITE,
         )
+        print("Creating r34")
         r34 = ElementaryCA(
             height,
             width,
             rule_n=34,
             cell_size=cell_size,
         )
+        print("All ECAs created")
         r110.to_edge(RIGHT, buff=3)
 
         # Set initial states
@@ -166,33 +175,46 @@ class RulesExamples(Slide):
         render_ca(r30)
         render_ca(r30_random)
 
-        self.shell3d()
+        self.shell3d(r30_shell)
 
         render_ca(r34)
 
         self.wait(0.1)
 
-    def shell3d(self, eca: ElementaryCA, turns=3, duration=8):
-        width = eca.cols
+    def shell3d(
+        self, eca: ElementaryCA, turns=3.25, duration=8, length=3, visible_width=100
+    ):
+        width = min(visible_width, eca.cols)
         gens = eca.rows
+        start_col = (eca.cols - width) // 2  # so the window is centered
         max_u = TAU * turns
 
         # Map CA coordinates onto a growing spiral shell
         def shell(u, v):
-            radius = 0.25 * np.exp(0.12 * u)
-            tube_radius = 0.45 * radius
+            base_radius = 0.01 * u
 
-            return 2 * np.array([
-                (radius + tube_radius * np.cos(v)) * np.cos(u),
-                (radius + tube_radius * np.cos(v)) * np.sin(u),
-                tube_radius * np.sin(v),
-            ])
+            amplitude = 1.7
+            mean = -length/2
+            sigma_left = 0.4
+            sigma_right = 1.2
+
+            sigma = sigma_left if v < mean else sigma_right
+            gaussian = np.exp(-0.5 * ((v - mean) / sigma) ** 2)
+            r = base_radius * (1 + amplitude * gaussian)
+
+            return np.array(
+                [
+                    r * np.sin(u),
+                    v * (1 - 0.01 * u),
+                    r * np.cos(u),
+                ]
+            )
 
         # Create a parametric surface with one face per CA cell
         surface = Surface(
             shell,
             u_range=(0, max_u),
-            v_range=(0, TAU),
+            v_range=(-2 * length / 3, length / 3),
             resolution=(gens, width),
             checkerboard_colors=False,
             stroke_width=0,
@@ -200,13 +222,12 @@ class RulesExamples(Slide):
         )
 
         # Color each face according to its corresponding CA cell
-        # TODO: Check whether the CA orientation matches the shell growth direction
         # Reverse the row or column mapping if necessary
         for face in surface:
             row = face.u_index
-            col = face.v_index
+            col = start_col + face.v_index
 
-            cell = eca.cells[row * width + col]
+            cell = eca.cells[row * eca.cols + col]
             color = eca.on_color if cell.alive else eca.off_color
 
             face.set_fill(color, opacity=1)
@@ -231,8 +252,7 @@ class RulesExamples(Slide):
         # Hide all faces initially without changing their colors
         for ring in rings:
             ring.set_opacity(0)
-            
-            
+
         # Animate growth by revealing one generation at a time
         self.play(
             AnimationGroup(
@@ -245,6 +265,12 @@ class RulesExamples(Slide):
 
         # Finish the slide
         self.next_slide()
+
+        # Fade out the shell
+        self.play(FadeOut(surface), run_time=0.5)
+
+        # Reset the camera for the following 2D slides
+        self.set_camera_orientation(phi=0, theta=-90 * DEGREES)
 
     def blur_image(self, image: ImageMobject, radius: float = 3) -> ImageMobject:
         blurred = Image.fromarray(image.pixel_array).filter(
