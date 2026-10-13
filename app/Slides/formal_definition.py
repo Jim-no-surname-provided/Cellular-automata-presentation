@@ -340,7 +340,7 @@ class Formal_Def(Slide):
         center = grid.get_cell(0, 0)
 
         smile = (
-            SVGMobject(r"src/smile.svg",
+            SVGMobject(r"res/smile.svg",
                        stroke_color=WHITE,
                        fill_color=BLACK,
                        fill_opacity=1,
@@ -548,7 +548,7 @@ class Formal_Def(Slide):
 
         # White smiley in origin cell
         smile = (
-            SVGMobject("src/smile.svg")
+            SVGMobject("res/smile.svg")
             .set_color(WHITE)
             .set_height(cell_size / 3)
             .move_to(grid.get_cell(0, 0).get_center())
@@ -584,7 +584,7 @@ class Formal_Def(Slide):
             self.focus_letter_animation(tau),
             run_time=0.4
         )
-        self.next_slide()
+        self.next_slide(auto_next=True)
 
         useable_space = config.frame_height - self.expr.get_height()*1.4
 
@@ -687,7 +687,7 @@ class Formal_Def(Slide):
         self.play(Transform(tau, tau_C))
 
         blob = (
-            SVGMobject(r"src/amorphous blob.svg",
+            SVGMobject(r"res/amorphous blob.svg",
                        stroke_color=WHITE,
                        fill_color=WHITE,
                        fill_opacity=0.1,

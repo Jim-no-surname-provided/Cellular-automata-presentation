@@ -4,8 +4,9 @@ from manim_slides.slide import Slide
 from PIL import Image
 
 # --- tunables ---
-TITLE = "Cellular Automata"
-GRID_H, GRID_W = 105, 300
+TITLE = "Swarm Intelligence"
+SUBTITLE = "HOW TO GET A COOL\nTATOO IN YOUR SHELL\nIF YOU ARE A SEA SNAIL"
+CELL_SIZE = 0.03
 ALIVE_COLOR = WHITE
 DEAD_COLOR = BLACK
 STEPS = 50
@@ -13,24 +14,38 @@ STEP_TIME = 0.15
 FADE_STEPS = 10
 
 
-class TitleSlide(Slide):
+class Title(Slide):
     def construct(self):
         """Plays the Cellular Automata title animation on the given Slide."""
         # Step 1: Draw the title
         title = Text(TITLE, weight=BOLD)
+        title.move_to(UP * config.frame_height / 6)
+
+        or_txt = Text("or", weight=BOLD, color=GRAY_D, font_size=18)
+        
+        subtitle = Paragraph(SUBTITLE, alignment="center", weight=BOLD, color=GRAY_C, font_size=32)
+        subtitle.move_to(DOWN * config.frame_height / 6)
+        
         self.play(Write(title))
         self.next_slide()
+        
+        self.play(FadeIn(or_txt), Write(subtitle))
+        self.next_slide(auto_next=True)
+        
+        # Step 2: Rasterize the texts using a fixed cell size
+        texts = VGroup(title, or_txt, subtitle)
+        mask_width = max(1, round(texts.width / CELL_SIZE))
+        mask_height = max(1, round(texts.height / CELL_SIZE))
+        mask = self.rasterize_title_mask(
+            texts, mask_height, mask_width, thresh=40, pad_px=0
+        )
 
-        # Step 2: Rasterize title into a binary mask
-        mask = self.rasterize_title_mask(title, GRID_H, GRID_W)
+        # Step 3: Create the grid with the fixed cell size
+        grid = LifeGrid(mask, cell_size=CELL_SIZE)
+        grid.move_to(texts.get_center())
 
-        # Step 3: Create Life grid from mask
-        grid = LifeGrid(mask)
-        grid.set_width(title.width)
-        grid.move_to(title.get_center())
-
-        # Step 4: Fade from title to pixel grid
-        self.play(FadeOut(title), FadeIn(grid))
+        # Step 4: Fade all three texts into the grid.
+        self.play(FadeOut(texts), FadeIn(grid))
 
         # Step 5: Run Game of Life
         fade_start = max(0, STEPS - FADE_STEPS)
@@ -83,12 +98,12 @@ class TitleSlide(Slide):
 
 
 class LifeGrid(VGroup):
-    def __init__(self, init_state, **kwargs):
+    def __init__(self, init_state, cell_size=CELL_SIZE, **kwargs):
         super().__init__(**kwargs)
         self.h, self.w = init_state.shape
         self.state = init_state.copy()
         for _ in range(self.h * self.w):
-            sq = Square(side_length=1).set_stroke(width=0)
+            sq = Square(side_length=cell_size).set_stroke(width=0)
             self.add(sq)
         self.arrange_in_grid(rows=self.h, cols=self.w, buff=0)
         self.update_colors()

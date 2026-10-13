@@ -1,5 +1,6 @@
-from CellularAutomatonGrid import CellularAutomatonGrid
 from manim import *
+
+from app.CellularAutomatonGrid import CellularAutomatonGrid
 
 
 class GameOfLifeGrid(CellularAutomatonGrid):
@@ -22,7 +23,7 @@ class GameOfLifeGrid(CellularAutomatonGrid):
         stroke_color=WHITE,
         stroke_width: float = 1.0,
         off_color=BLACK,
-        on_color=YELLOW,
+        on_color=YELLOW_E,
     ):
         super().__init__(
             rows=rows,

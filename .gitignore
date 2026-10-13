@@ -74,6 +74,7 @@ __pypackages__/
 *.pyproj
 
 # Local files
+/AGENTS.md
 *.sqlite3
 .envrc
 *.env
@@ -95,10 +96,14 @@ Desktop.ini
 .vscode/
 # .idea/
 
+# Local video assets
+*.mp4
+*.mov
+*.mkv
+
 # manim-slides
+/presentation_assets/
 /slides/
 out/
 media/
 positioning aids/
-*.mp4
-*.mkv

@@ -17,8 +17,12 @@ class RulesExamples(ThreeDSlide):
         height = 141
         width = 300
         self.make_rules(height, width, 0.9 * config.frame_height / height)
+        self.wait(0.1)
 
     def make_rules(self, height, width, cell_size):
+        # Reduce size if quality low, for testing purposes
+        height = height if config.quality != "low_quality" else int(0.2 * height)
+
         # Create both grids using the helpers
         print("Creating r90")
         r90 = ElementaryCA(
@@ -108,7 +112,7 @@ class RulesExamples(ThreeDSlide):
         cas = (r90, r110, r110_ether, r110_collision, r30, r30_random, r30_shell, r34)
 
         # For low quality, make it smaller
-        gens = height - 1 if config.quality != "low_quality" else int(0.2 * height)
+        gens = height - 1
 
         print("Running CAs")
         # Run the CA evolution
@@ -155,31 +159,22 @@ class RulesExamples(ThreeDSlide):
                 self.play(FadeOut(image), run_time=0.4)
             return image
 
+        def render_and_then_blur(r: CellularAutomatonGrid):
+            img = render_ca(r, False)
+            blured = self.blur_image(img, radius=1)
+            self.play(FadeTransform(img, blured))
+            self.next_slide()
+            self.play(FadeOut(blured))
+
         # Render CAs
         render_ca(r90)
-        img_r110 = render_ca(r110, False)
-        img_r110_blurred = self.blur_image(img_r110, radius=1)
-
-        self.play(FadeTransform(img_r110, img_r110_blurred))
-        self.next_slide()
-        self.play(FadeOut(img_r110_blurred))
-
-        render_ca(r110_ether)
-        img_r110_collision = render_ca(r110_collision, False)
-        img_r110_col_blurred = self.blur_image(img_r110_collision, radius=1)
-
-        self.play(FadeTransform(img_r110_collision, img_r110_col_blurred))
-        self.next_slide()
-        self.play(FadeOut(img_r110_col_blurred))
-
+        render_and_then_blur(r110)
+        render_and_then_blur(r110_ether)
+        render_and_then_blur(r110_collision)
         render_ca(r30)
         render_ca(r30_random)
-
         self.shell3d(r30_shell)
-
         render_ca(r34)
-
-        self.wait(0.1)
 
     def shell3d(
         self, eca: ElementaryCA, turns=3.25, duration=8, length=3, visible_width=100
@@ -191,16 +186,17 @@ class RulesExamples(ThreeDSlide):
 
         # Map CA coordinates onto a growing spiral shell
         def shell(u, v):
-            base_radius = 0.01 * u
+            start_radius = 0.1
+            growth_rate = 0.03
+            base_radius = start_radius + growth_rate * u
 
-            amplitude = 1.7
-            mean = -length/2
-            sigma_left = 0.4
-            sigma_right = 1.2
+            mean = -1.5
 
-            sigma = sigma_left if v < mean else sigma_right
-            gaussian = np.exp(-0.5 * ((v - mean) / sigma) ** 2)
-            r = base_radius * (1 + amplitude * gaussian)
+            A_L = (v + length) / (mean + length)
+            A_R = 1/(1+np.exp(2.7*v-0.9))
+            
+            A = A_L if v < mean else A_R
+            r = base_radius * A
 
             return np.array(
                 [
@@ -232,12 +228,19 @@ class RulesExamples(ThreeDSlide):
 
             face.set_fill(color, opacity=1)
 
-        # Position the shell and configure the 3D camera
+        # Position the shell and configure the initial camera
         surface.move_to(ORIGIN)
 
+        # Focus on the first generation
+        first_ring_center = VGroup(
+            *[face for face in surface if face.u_index == 0]
+        ).get_center()
+
         self.set_camera_orientation(
-            phi=65 * DEGREES,
-            theta=-45 * DEGREES,
+            phi=0,
+            theta=-90 * DEGREES,
+            frame_center=first_ring_center,
+            zoom=4,
         )
 
         self.add(surface)
@@ -249,28 +252,85 @@ class RulesExamples(ThreeDSlide):
         for face in surface:
             rings[face.u_index].add(face)
 
-        # Hide all faces initially without changing their colors
+        # Hide all faces initially
         for ring in rings:
             ring.set_opacity(0)
 
-        # Animate growth by revealing one generation at a time
-        self.play(
-            AnimationGroup(
-                *(ring.animate.set_opacity(1) for ring in rings),
-                lag_ratio=1,
-                run_time=duration,
-                rate_func=linear,
-            )
+        # Show the first generation
+        rings[0].set_opacity(1)
+        self.wait(0.1)  # it doesn't make an animation otherwise
+        self.next_slide()
+
+        # Show the second generation
+        rings[1].set_opacity(1)
+        self.wait(0.1)  # it doesn't make an animation otherwise
+        self.next_slide()
+
+        # Show the second generation
+        rings[2].set_opacity(1)
+        self.wait(0.1)  # it doesn't make an animation otherwise
+        self.next_slide()
+
+        # Reveal the remaining generations instantly as the camera moves
+        def grow(mob, alpha):
+            visible_gens = 2 + int(alpha * (gens - 2))
+
+            for i in range(2, visible_gens):
+                rings[i].set_opacity(1)
+
+        self.move_camera(
+            phi=60 * DEGREES,
+            theta=-28 * DEGREES,
+            zoom=2,
+            frame_center=ORIGIN,
+            added_anims=[
+                UpdateFromAlphaFunc(surface, grow),
+            ],
+            run_time=duration,
+            rate_func=linear,
         )
 
         # Finish the slide
         self.next_slide()
 
-        # Fade out the shell
-        self.play(FadeOut(surface), run_time=0.5)
+        # Place the photo at the right third-divider of the screen
+        snail = ImageMobject("res/textile_cone.jpg")
+        snail.set_height(0.65 * config.frame_height)
+        if snail.width > 0.4 * config.frame_width:
+            snail.set_width(0.4 * config.frame_width)
+        snail.move_to(RIGHT * config.frame_width / 6)
+        snail.scale(0.9)
+
+        # Keep the photo in screen coordinates despite the 3D camera
+        self.add_fixed_in_frame_mobjects(snail)
+        self.remove(snail)
+
+        # Convert the left screen position into world coordinates
+        screen_target = LEFT * config.frame_width / 6
+        shell_target = (
+            self.camera.frame_center
+            + self.camera.get_rotation_matrix().T
+            @ (screen_target / self.camera.get_zoom())
+        )
+
+        # Move the shell left while revealing the photo in place
+        self.play(
+            surface.animate.move_to(shell_target),
+            FadeIn(snail),
+            run_time=1.2,
+        )
+        self.next_slide()
+
+        # Fade out both
+        self.play(
+            FadeOut(surface),
+            FadeOut(snail),
+            run_time=0.5,
+        )
+        self.remove_fixed_in_frame_mobjects(snail)
 
         # Reset the camera for the following 2D slides
-        self.set_camera_orientation(phi=0, theta=-90 * DEGREES)
+        self.set_camera_orientation(phi=0, theta=-90 * DEGREES, zoom=1)
 
     def blur_image(self, image: ImageMobject, radius: float = 3) -> ImageMobject:
         blurred = Image.fromarray(image.pixel_array).filter(

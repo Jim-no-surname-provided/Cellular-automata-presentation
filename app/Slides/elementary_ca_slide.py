@@ -242,4 +242,4 @@ class Elementary_CA_Slide(Slide):
             Transform(table.header_lines[0], table.header_lines[2]),
             run_time=0.4
         )
-        self.next_slide()
+        self.next_slide(auto_next=True)
