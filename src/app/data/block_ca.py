@@ -1,9 +1,9 @@
 from manim import *
 
-from app.CellularAutomatonGrid import CellularAutomatonGrid
+from .cellular_automaton import CellularAutomaton
 
 
-class BlockCA(CellularAutomatonGrid):
+class BlockCA(CellularAutomaton):
     def __init__(
         self,
         rows,

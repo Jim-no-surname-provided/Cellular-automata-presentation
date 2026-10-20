@@ -1,9 +1,9 @@
 from manim import *
 
-from app.CellularAutomatonGrid import CellularAutomatonGrid
+from .cellular_automaton import CellularAutomaton
 
 
-class GameOfLifeGrid(CellularAutomatonGrid):
+class GameOfLife(CellularAutomaton):
     """Conway's Game of Life (B3/S23) on a Moore 3x3 neighborhood."""
 
     # Center-first Moore neighborhood:

@@ -3,10 +3,8 @@ from collections.abc import Callable
 import numpy as np
 from manim import *
 
-# pyright: reportAttributeAccessIssue=false
 
-
-class CellularAutomatonGrid(VGroup):
+class CellularAutomaton(VGroup):
     def __init__(
         self,
         rows: int,

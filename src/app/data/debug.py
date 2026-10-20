@@ -1,4 +1,4 @@
-from manim import Text, DOWN
+from manim import DOWN, Text
 
 # Internal state
 _DEBUG_STATE = {

@@ -4,11 +4,15 @@ from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
 from manim_slides.slide import ThreeDSlide
 from PIL import Image, ImageFilter
 
-from app.CellularAutomatonGrid import CellularAutomatonGrid
-from app.ElementaryCA import ElementaryCA
+from app.data import CellularAutomaton, ElementaryCA
+from app.paths import RES_DIR, SLIDES_DIR
 
 
 class RulesExamples(ThreeDSlide):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("output_folder", SLIDES_DIR)
+        super().__init__(*args, **kwargs)
+
     @property
     def wait_time_between_slides(self) -> float:
         return 0.1
@@ -136,7 +140,7 @@ class RulesExamples(ThreeDSlide):
             self.remove(row)
         self.next_slide()
 
-        def render_ca(r: CellularAutomatonGrid, fade_out: bool = True):
+        def render_ca(r: CellularAutomaton, fade_out: bool = True):
             image = r.to_image()
             cover = Rectangle(
                 width=image.width,
@@ -159,7 +163,7 @@ class RulesExamples(ThreeDSlide):
                 self.play(FadeOut(image), run_time=0.4)
             return image
 
-        def render_and_then_blur(r: CellularAutomatonGrid):
+        def render_and_then_blur(r: CellularAutomaton):
             img = render_ca(r, False)
             blured = self.blur_image(img, radius=1)
             self.play(FadeTransform(img, blured))
@@ -294,7 +298,7 @@ class RulesExamples(ThreeDSlide):
         self.next_slide()
 
         # Place the photo at the right third-divider of the screen
-        snail = ImageMobject("res/textile_cone.jpg")
+        snail = ImageMobject(str(RES_DIR / "textile_cone.jpg"))
         snail.set_height(0.65 * config.frame_height)
         if snail.width > 0.4 * config.frame_width:
             snail.set_width(0.4 * config.frame_width)

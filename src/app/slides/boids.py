@@ -4,10 +4,15 @@ import numpy as np
 from manim import *
 from manim_slides.slide import Slide
 
-from app.Boid import Boid
+from app.data import Boid, Credits
+from app.paths import RES_DIR, SLIDES_DIR
 
 
 class Boids(Slide):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("output_folder", SLIDES_DIR)
+        super().__init__(*args, **kwargs)
+
     @property
     def wait_time_between_slides(self) -> float:
         return 0.1
@@ -302,25 +307,14 @@ class Boids(Slide):
                 for mobject in list(self.mobjects)
             ]
         )
-        photo = ImageMobject("res/Me and the boids/Me and the boids.png")
+        photo = ImageMobject(str(RES_DIR / "Me and the boids" / "Me and the boids.png"))
         photo.set_height(4).move_to(ORIGIN)
-        photo_credits = self.make_credits("Florida Museum photo by Zachary Randall")
+        photo_credits = Credits("Florida Museum photo by Zachary Randall")
         self.play(FadeIn(photo), FadeIn(photo_credits))
         self.next_slide(auto_next=True)
 
         # Fade out and continue to the next scene
         self.play(FadeOut(Group(*self.mobjects)), run_time=0.5)
-
-    def make_credits(self, text):
-        return (
-            MathTex(
-                r"\text{" + text + "}",
-                font_size=10,
-                color=GREY_B,
-            )
-            .to_corner(UR, buff=0.1)
-            .set_z_index(9999)
-        )
 
     def align_boid(self, boid, line, target):
         initial_heading = boid.heading
