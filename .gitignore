@@ -96,11 +96,6 @@ Desktop.ini
 .vscode/
 # .idea/
 
-# Local video assets
-*.mp4
-*.mov
-*.mkv
-
 # manim-slides
 /presentation_assets/
 /slides/
