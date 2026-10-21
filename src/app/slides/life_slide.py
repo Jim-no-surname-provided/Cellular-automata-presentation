@@ -6,6 +6,7 @@ from app.paths import RES_DIR, SLIDES_DIR
 
 ICONS_Z_INDEX = 1
 
+
 class LifeSlide(Slide):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("output_folder", SLIDES_DIR)
@@ -26,7 +27,9 @@ class LifeSlide(Slide):
             self.play(*grid.render_cells(), run_time=0.4)
 
         # Make some of them be alive (middle cell should be alive)
-        grid.set_alive({(0, 0), (-1, 0), (1, 0), (0, -1), (-1, -1), (1, -1), (0, -2)})  # configuration
+        grid.set_alive(
+            {(0, 0), (-1, 0), (1, 0), (0, -1), (-1, -1), (1, -1), (0, -2)}
+        )  # configuration
         self.play(*grid.render_cells(), run_time=0.4)
         self.next_slide()
 
@@ -58,7 +61,7 @@ class LifeSlide(Slide):
         self.play(
             grid.animate.move_to(LEFT * (config.frame_width / (6))),
             Write(rules[0]),
-            run_time=1
+            run_time=1,
         )
         self.next_slide()
 
@@ -68,14 +71,14 @@ class LifeSlide(Slide):
 
         # Declare skull and smile svgs and actual icon that will appear on screen
         skull = (
-            SVGMobject(str(RES_DIR / "skull.svg"))
+            SVGMobject(str(RES_DIR / "icons" / "skull.svg"))
             .set_fill(WHITE)
             .set_height(grid.get_cell(0, 0).get_height() * 0.6)
             .move_to(grid.get_cell(0, 0).get_center())
             .set_z_index(ICONS_Z_INDEX)
         )
         smile = (
-            SVGMobject(str(RES_DIR / "smile.svg"))
+            SVGMobject(str(RES_DIR / "icons" / "smile.svg"))
             .set_fill(BLACK)
             .set_height(grid.get_cell(0, 0).get_height() * 0.6)
             .move_to(grid.get_cell(0, 0).get_center())
@@ -89,7 +92,7 @@ class LifeSlide(Slide):
             Indicate(grid.get_cell(0, 0), color=BLUE_A),
             FadeIn(icon, scale=0.3),
             *anims,
-            run_time=0.5
+            run_time=0.5,
         )
         self.next_slide()
 
@@ -99,7 +102,8 @@ class LifeSlide(Slide):
             *self.disappear_labels_to_center(grid, labels),
             *grid.render_cells(),
             Transform(icon, smile),
-            run_time=0.4)
+            run_time=0.4,
+        )
         self.play(icon.animate.set_opacity(icon.get_opacity()))
 
         labels = []
@@ -108,12 +112,7 @@ class LifeSlide(Slide):
         # Add the rule "Alive cells with 2 or 3 cells stay alive" and
         # Count neighbors around middle cell
         anims, labels = self.label_alive_neighbors(grid)
-        self.play(
-            Write(rules[3]),
-            Write(rules[4]),
-            *anims,
-            run_time=0.5
-        )
+        self.play(Write(rules[3]), Write(rules[4]), *anims, run_time=0.5)
         self.next_slide()
 
         # Update (middle cell should survive)
@@ -122,15 +121,13 @@ class LifeSlide(Slide):
             *self.disappear_labels_to_center(grid, labels),
             *grid.render_cells(),
             Indicate(icon),
-            run_time=0.4)
+            run_time=0.4,
+        )
         self.next_slide()
 
         # Count neighbors around middle cell
         anims, labels = self.label_alive_neighbors(grid)
-        self.play(
-            *anims,
-            run_time=0.5
-        )
+        self.play(*anims, run_time=0.5)
         self.next_slide()
 
         # Update (middle cell should die)
@@ -139,17 +136,20 @@ class LifeSlide(Slide):
             *self.disappear_labels_to_center(grid, labels),
             *grid.render_cells(),
             Transform(icon, skull),
-            run_time=0.4)
+            run_time=0.4,
+        )
         self.next_slide()
 
         # Let run and fade out
-        self.play(FadeOut(Group(*self.mobjects)), run_time=.2)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.2)
         self.community_achievements()
 
     def community_achievements(self):
         cpu = VideoMobject(str(RES_DIR / "cpu recordings" / "sine_cpu.mp4"))
         display = VideoMobject(str(RES_DIR / "cpu recordings" / "sine_display.mp4"))
-        gliders = VideoMobject(str(RES_DIR / "cpu recordings" / "gliders.mp4"), loop=True)
+        gliders = VideoMobject(
+            str(RES_DIR / "cpu recordings" / "gliders.mp4"), loop=True
+        )
         gliders = Group(
             gliders,
             SurroundingRectangle(
@@ -159,7 +159,7 @@ class LifeSlide(Slide):
                 stroke_width=1,
             ),
         )
-        
+
         cpu_credits = Credits("@nicolasloizeau on github")
 
         cpu.move_to(np.array([0.1, 0.0, 0.0])).set_height(8.0)
@@ -180,7 +180,7 @@ class LifeSlide(Slide):
             display.animate.move_to(np.array([4.2, 1.2, 0.0])).set_height(5.3),
             FadeIn(gliders),
             run_time=1.2,
-            rate_func=smooth
+            rate_func=smooth,
         )
         if config.quality == "low_quality":
             self.wait(2)
@@ -199,8 +199,7 @@ class LifeSlide(Slide):
 
     def disappear_labels_to_center(self, grid, labels):
         return [
-            label.animate
-            .move_to(grid.get_cell(0, 0).get_center())
+            label.animate.move_to(grid.get_cell(0, 0).get_center())
             .scale(0.1)
             .set_opacity(0)
             for label in labels
@@ -208,11 +207,7 @@ class LifeSlide(Slide):
 
     def label_alive_neighbors(self, grid):
         def alive_neighbors_of(x, y):
-            return [
-                cell
-                for cell in grid.neighbors_of(x, y)
-                if cell.alive
-            ]
+            return [cell for cell in grid.neighbors_of(x, y) if cell.alive]
 
         anims = []
         labels = []
@@ -236,11 +231,15 @@ class LifeSlide(Slide):
         img = ImageMobject(str(RES_DIR / "Conway picture.jpg"))
         img.set_height(target_width_percentage * config.frame_height)
 
-        caption = Paragraph(
-            "John Conway",
-            "(26 December 1937 - 11 April 2020)",
-            alignment="center",
-        ).set_width(img.get_width()).next_to(img, DOWN)
+        caption = (
+            Paragraph(
+                "John Conway",
+                "(26 December 1937 - 11 April 2020)",
+                alignment="center",
+            )
+            .set_width(img.get_width())
+            .next_to(img, DOWN)
+        )
 
         # Group image and caption
         conway_group = Group(img, caption)

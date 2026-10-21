@@ -21,7 +21,7 @@ class Intro(Slide):
         birds = (
             VideoMobject(
                 str(RES_DIR / "Flock of Birds.mkv"),
-                start_time=8,
+                start_time=9,
                 end_time=30,
             )
             .set_height(MEDIA_HEIGHT)
@@ -30,6 +30,7 @@ class Intro(Slide):
         birds_credits = Credits("Youtube: The Pet Collective Too")
         birds.suspend_updating()
         self.play(FadeIn(birds))
+        birds.suspend_updating()
         self.next_slide()
 
         # Start playback after the opening still frame
