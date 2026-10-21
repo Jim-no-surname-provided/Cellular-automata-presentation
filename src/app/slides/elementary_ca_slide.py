@@ -178,7 +178,12 @@ class Elementary_CA_Slide(Slide):
         scheme_x = (self.LEFT_EDGE + RIGHT*config.frame_width*2/3)[0]
 
         scheme_tex = (
-            MathTex(r"{{h}}{{g}}{{f}}{{e}}{{ d}}{{c}}{{b}}{{a}} \rightarrow \text{Wolfram Scheme}", font_size=32)
+            MathTex(
+                "h", "g", "f", "e", "d", "c", "b", "a",
+                r" \rightarrow \text{Wolfram Scheme}",
+                arg_separator="",
+                font_size=32,
+            )
             .move_to([scheme_x, scheme_y, 0])
         )
         scheme_90 = (

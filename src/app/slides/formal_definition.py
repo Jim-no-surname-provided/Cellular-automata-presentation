@@ -358,7 +358,7 @@ class Formal_Def(Slide):
             substrings_to_isolate=[r"\_"],
         ).move_to(x_y)
 
-        underscores = X2.get_parts_by_tex(r"\_")
+        underscores = self.parts_by_tex(X2, r"\_")
 
         arrows_y = (X.get_top()[1] + underscores[0].get_top()[1])/2
 
@@ -389,7 +389,7 @@ class Formal_Def(Slide):
             substrings_to_isolate=[r"\_"],
         ).move_to(x_y)
 
-        underscores2 = X3.get_parts_by_tex(r"\_")
+        underscores2 = self.parts_by_tex(X3, r"\_")
 
         # Targets for 8 arrows → 8 first underscores
         targets2 = self._arrow_targets(
@@ -710,6 +710,13 @@ class Formal_Def(Slide):
 
         return tau, arrow, blob
 
+    def parts_by_tex(self, formula, tex):
+        # Collect all SVG groups that exactly match the requested TeX
+        return VGroup(*[
+            formula.id_to_vgroup_dict[match_id]
+            for matched_tex, match_id in formula.matched_strings_and_ids
+            if matched_tex == tex
+        ])
 
 class Formal_Def_Mai(Formal_Def):
     EINSTEIN_HAT_FILE = str(RES_DIR / "CA examples" / "Mai einstein hat GoL.mp4")
