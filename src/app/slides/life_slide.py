@@ -1,4 +1,4 @@
-from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
+from manim import *
 from manim_slides.slide import Slide
 
 from app.data import Credits, GameOfLife, VideoMobject
@@ -185,7 +185,7 @@ class LifeSlide(Slide):
         if config.quality == "low_quality":
             self.wait(2)
         else:
-            self.wait(240)
+            self.wait(max(cpu.remaining_time(), display.remaining_time()))
 
         self.next_slide()
         self.play(

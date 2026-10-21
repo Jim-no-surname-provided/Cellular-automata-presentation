@@ -39,7 +39,6 @@ class Boid(VGroup):
         self.obstacle_radius = obstacle_radius
         self.anchor = VectorizedPoint(ORIGIN)
         self.add(self.body, self.anchor)
-        self.move_to(ORIGIN)
         self.heading = 0.0
         self.tracking_list = []
         self.obstacles: list[Mobject] = []

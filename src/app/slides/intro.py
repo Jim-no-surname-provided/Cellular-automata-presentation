@@ -2,7 +2,7 @@ from manim import *
 from manim_slides.slide import Slide
 
 from app.data import Credits, VideoMobject
-from app.paths import RES_DIR, SLIDES_DIR
+from app.paths import ANTS_DIR, RES_DIR, SLIDES_DIR
 
 MEDIA_HEIGHT = 3
 
@@ -25,7 +25,6 @@ class Intro(Slide):
                 end_time=30,
             )
             .set_height(MEDIA_HEIGHT)
-            .move_to(ORIGIN)
         )
         birds_credits = Credits("Youtube: The Pet Collective Too")
         birds.suspend_updating()
@@ -54,12 +53,11 @@ class Intro(Slide):
         # Replace the multiple ants with the single ant
         single_ant = (
             VideoMobject(
-                str(RES_DIR / "single_ant.mov"),
+                str(ANTS_DIR / "single_ant.mov"),
                 start_time=5,
                 end_time=30,
             )
             .set_height(MEDIA_HEIGHT)
-            .move_to(ORIGIN)
         )
         self.play(FadeIn(ants_credits), FadeIn(single_ant))
         self.wait(single_ant.remaining_time())
@@ -73,7 +71,7 @@ class Intro(Slide):
 
         # Show the shell photo with its attribution
         snail = ImageMobject(str(RES_DIR / "textile_cone.jpg"))
-        snail.set_height(MEDIA_HEIGHT).move_to(ORIGIN)
+        snail.set_height(MEDIA_HEIGHT)
         snail_credits = Credits(
             "Richard Ling, Own work, Cod Hole, Great Barrier Reef, "
             "Australia, CC BY-SA 3.0"

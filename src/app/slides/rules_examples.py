@@ -233,8 +233,6 @@ class RulesExamples(ThreeDSlide):
             face.set_fill(color, opacity=1)
 
         # Position the shell and configure the initial camera
-        surface.move_to(ORIGIN)
-
         # Focus on the first generation
         first_ring_center = VGroup(
             *[face for face in surface if face.u_index == 0]

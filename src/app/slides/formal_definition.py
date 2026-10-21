@@ -88,14 +88,14 @@ class Formal_Def(Slide):
         self.add(neural_ca_g)
         credits_tex = Credits("Growing NCA (Mordvintsev et al., 2020, Distill)")
         self.play(FadeIn(credits_tex))
-        self.wait(24)
+        self.wait(neural_ca.remaining_time())
         self.next_slide()
 
         # Left: A = R^16
         A_scale = 0.6
         A_gap = 3
         A_eq = MathTex(r"A = \mathbb{R}^{16}").scale(A_scale * 2)
-        A_eq.move_to(ORIGIN).shift(LEFT * A_gap / 2)
+        A_eq.shift(LEFT * A_gap / 2)
 
         self.play(neural_ca_g.animate.scale(0.5).to_corner(UL, buff=1))
         self.play(Write(A_eq))
@@ -188,7 +188,7 @@ class Formal_Def(Slide):
         self.einstein_hat()
 
     def snowflake(self):
-        snowflake_growth = (
+        snowflake_growth: VideoMobject = (
             VideoMobject(
                 str(RES_DIR / "CA examples" / "Hexagonal CA for snowflake growth.mp4")
             )
@@ -200,7 +200,7 @@ class Formal_Def(Slide):
         credits_tex = Credits("Yan Huck at ITP, Frankfurt")
         self.play(FadeIn(credits_tex))
 
-        self.wait(30)
+        self.wait(snowflake_growth.remaining_time())
         self.next_slide()
 
         cube = Cube(
@@ -252,7 +252,7 @@ class Formal_Def(Slide):
         return axis, angle
 
     def einstein_hat(self):
-        einstein_hat = (
+        einstein_hat: VideoMobject = (
             VideoMobject(self.EINSTEIN_HAT_FILE)
             .set_height(2 * config.frame_height / 3 - 0.5)
             .move_to(self.THIRD_UP)
@@ -264,11 +264,11 @@ class Formal_Def(Slide):
         self.play(FadeIn(credits_tex))
         self.add(einstein_hat_g)
         self.next_slide()
-        self.wait(30)
+        self.wait(einstein_hat.remaining_time())
         self.next_slide()
         self.remove(einstein_hat_g)
 
-        einstein_hat_oscillator = (
+        einstein_hat_oscillator: VideoMobject = (
             VideoMobject(str(RES_DIR / "CA examples" / "Oscillator einstein hat.mp4"))
             .set_height(2 * config.frame_height / 3 - 0.5)
             .move_to(self.THIRD_UP)
@@ -278,7 +278,7 @@ class Formal_Def(Slide):
         )
         self.add(einstein_hat_oscillator_g)
         self.next_slide()
-        self.wait(10)
+        self.wait(einstein_hat_oscillator.remaining_time())
         self.next_slide()
         self.remove(einstein_hat_oscillator_g)
         self.play(FadeOut(credits_tex), run_time=0.4)
@@ -410,7 +410,6 @@ class Formal_Def(Slide):
             off_color=BLACK,
             on_color=YELLOW,
         )
-        grid.move_to(ORIGIN)
         return grid, cell_size
 
     def _arrows_from_center(self, grid):

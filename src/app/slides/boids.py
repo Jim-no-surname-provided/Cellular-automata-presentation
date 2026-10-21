@@ -308,7 +308,7 @@ class Boids(Slide):
             ]
         )
         photo = ImageMobject(str(RES_DIR / "Me and the boids" / "Me and the boids.png"))
-        photo.set_height(4).move_to(ORIGIN)
+        photo.set_height(4)
         photo_credits = Credits("Florida Museum photo by Zachary Randall")
         self.play(FadeIn(photo), FadeIn(photo_credits))
         self.next_slide(auto_next=True)
