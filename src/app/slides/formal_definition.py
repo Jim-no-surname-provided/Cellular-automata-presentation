@@ -1,19 +1,22 @@
 import random
 
-from BlockCA import BlockCA
-from CellularAutomatonGrid import CellularAutomatonGrid
 from manim import *
 from manim_slides.slide import Slide
 
-from app.VideoMobject import VideoMobject
+from app.data import BlockCA, CellularAutomaton, Credits, VideoMobject
+from app.paths import RES_DIR, SLIDES_DIR
 
 
 class Formal_Def(Slide):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("output_folder", SLIDES_DIR)
+        super().__init__(*args, **kwargs)
+
 
     THIRD_UP = UP*config.frame_height*(1/6)
     THIRD_DOWN = DOWN*config.frame_height*(1/6)
     TOP = (config.frame_height/2)*UP
-    EINSTEIN_HAT_FILE = r"src\CA examples\Quick einstein hat GoL.mp4"
+    EINSTEIN_HAT_FILE = str(RES_DIR / "CA examples" / "Quick einstein hat GoL.mp4")
 
     FOCUS_LETTER_SCALE = 1.4
 
@@ -91,17 +94,13 @@ class Formal_Def(Slide):
     def neural_CA(self):
         # Add neural CA video
         neural_ca = VideoMobject(
-            r"src\CA examples\Growing Neural Cellular Automata.mp4"
+            str(RES_DIR / "CA examples" / "Growing Neural Cellular Automata.mp4")
         ).scale(0.5)
 
         neural_ca_g = Group(neural_ca, SurroundingRectangle(neural_ca))
 
         self.add(neural_ca_g)
-        credits_tex = MathTex(
-            r"\text{Growing NCA (Mordvintsev et al., 2020, Distill)}",
-            font_size=10,
-            color=GREY_B,
-        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        credits_tex = Credits("Growing NCA (Mordvintsev et al., 2020, Distill)")
         self.play(FadeIn(credits_tex))
         self.wait(24)
         self.next_slide()
@@ -223,15 +222,11 @@ class Formal_Def(Slide):
 
     def snowflake(self):
         snowflake_growth = VideoMobject(
-            r"src\CA examples\Hexagonal CA for snowflake growth.mp4"
+            str(RES_DIR / "CA examples" / "Hexagonal CA for snowflake growth.mp4")
         ).set_height(2*config.frame_height/3 - 0.5).move_to(self.THIRD_UP)
 
         self.add(snowflake_growth)
-        credits_tex = MathTex(
-            r"\text{Yan Huck at ITP, Frankfurt}",
-            font_size=10,
-            color=GREY_B,
-        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        credits_tex = Credits("Yan Huck at ITP, Frankfurt")
         self.play(FadeIn(credits_tex))
 
         self.wait(30)
@@ -296,11 +291,7 @@ class Formal_Def(Slide):
 
         einstein_hat_g = Group(einstein_hat, SurroundingRectangle(einstein_hat))
 
-        credits_tex = MathTex(
-            r"\text{@henrypdonahue on Github}",
-            font_size=10,
-            color=GREY_B,
-        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        credits_tex = Credits("@henrypdonahue on Github")
         self.play(FadeIn(credits_tex))
         self.add(einstein_hat_g)
         self.next_slide()
@@ -309,7 +300,7 @@ class Formal_Def(Slide):
         self.remove(einstein_hat_g)
 
         einstein_hat_oscillator = VideoMobject(
-            r"src\CA examples\Oscillator einstein hat.mp4"
+            str(RES_DIR / "CA examples" / "Oscillator einstein hat.mp4")
         ).set_height(2*config.frame_height/3 - 0.5).move_to(self.THIRD_UP)
         einstein_hat_oscillator_g = Group(einstein_hat_oscillator, SurroundingRectangle(einstein_hat_oscillator))
         self.add(einstein_hat_oscillator_g)
@@ -340,7 +331,7 @@ class Formal_Def(Slide):
         center = grid.get_cell(0, 0)
 
         smile = (
-            SVGMobject(r"src/smile.svg",
+            SVGMobject(str(RES_DIR / "smile.svg"),
                        stroke_color=WHITE,
                        fill_color=BLACK,
                        fill_opacity=1,
@@ -444,7 +435,7 @@ class Formal_Def(Slide):
         grid_h = config.frame_height / 3
         cell_size = grid_h / 3
 
-        grid = CellularAutomatonGrid(
+        grid = CellularAutomaton(
             rows=3, cols=3,
             cell_size=cell_size,
             buff=0.0,
@@ -534,7 +525,7 @@ class Formal_Def(Slide):
 
     def tape(self, N):
         cell_size = config.frame_height / 12
-        grid = CellularAutomatonGrid(
+        grid = CellularAutomaton(
             rows=1, cols=9,
             cell_size=cell_size
         )
@@ -548,7 +539,7 @@ class Formal_Def(Slide):
 
         # White smiley in origin cell
         smile = (
-            SVGMobject("src/smile.svg")
+            SVGMobject(str(RES_DIR / "smile.svg"))
             .set_color(WHITE)
             .set_height(cell_size / 3)
             .move_to(grid.get_cell(0, 0).get_center())
@@ -556,7 +547,7 @@ class Formal_Def(Slide):
         )
 
         # Color yellow and index 1
-        start = -1 if not N == 1 else 0
+        start = -1 if N != 1 else 0
         end = start + N
         for i in range(start, end):
             (grid
@@ -584,7 +575,7 @@ class Formal_Def(Slide):
             self.focus_letter_animation(tau),
             run_time=0.4
         )
-        self.next_slide()
+        self.next_slide(auto_next=True)
 
         useable_space = config.frame_height - self.expr.get_height()*1.4
 
@@ -687,7 +678,7 @@ class Formal_Def(Slide):
         self.play(Transform(tau, tau_C))
 
         blob = (
-            SVGMobject(r"src/amorphous blob.svg",
+            SVGMobject(str(RES_DIR / "amorphous blob.svg"),
                        stroke_color=WHITE,
                        fill_color=WHITE,
                        fill_opacity=0.1,
@@ -721,4 +712,4 @@ class Formal_Def(Slide):
 
 
 class Formal_Def_Mai(Formal_Def):
-    EINSTEIN_HAT_FILE = r"src\CA examples\Mai einstein hat GoL.mp4"
+    EINSTEIN_HAT_FILE = str(RES_DIR / "CA examples" / "Mai einstein hat GoL.mp4")

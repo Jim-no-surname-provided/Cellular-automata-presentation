@@ -20,11 +20,11 @@ pip install -r requirements.txt
 ### Rendering Slides
 To compile the videos and then slides, use:
 ```bash
-manim-slides render app/main.py Main
+manim-slides render app/slides/main.py Main
 ```
 If your scene contains many sub-mobjects, disable caching:
 ```bash
-manim-slides render app/main.py Main --disable_caching
+manim-slides render app/slides/main.py Main --disable_caching
 ```
 
 ---
@@ -32,8 +32,10 @@ manim-slides render app/main.py Main --disable_caching
 ### Running the Slideshow
 Run the slides interactively with:
 ```bash
-manim-slides  Title Intro Formal_Def Elementary_CA_Slide RulesExamples
-manim-slides  Title Intro Formal_Def_Mai Elementary_CA_Slide RulesExamples
+manim-slides --folder ./build/slides TitleCA LifeSlide Formal_Def Elementary_CA_Slide RulesExamples
+manim-slides --folder ./build/slides TitleCA LifeSlide Formal_Def_Mai Elementary_CA_Slide RulesExamples
+manim-slides --folder ./build/slides Intro TitleSI Boids LifeSlide Formal_Def Elementary_CA_Slide RulesExamples
+
 ```
 
 ---

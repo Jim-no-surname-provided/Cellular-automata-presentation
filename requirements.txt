@@ -1,3 +1,0 @@
-manim
-manim-slides[pyside6-full]
-opencv-python

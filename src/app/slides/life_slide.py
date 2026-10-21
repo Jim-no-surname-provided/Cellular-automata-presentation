@@ -1,19 +1,23 @@
-from GameOfLifeGrid import GameOfLifeGrid
 from manim import *  # pyright: ignore[reportWildcardImportFromLibrary]
 from manim_slides.slide import Slide
 
-from app.VideoMobject import VideoMobject
+from app.data import Credits, GameOfLife, VideoMobject
+from app.paths import RES_DIR, SLIDES_DIR
 
 ICONS_Z_INDEX = 1
 
-class Intro(Slide):
+class LifeSlide(Slide):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("output_folder", SLIDES_DIR)
+        super().__init__(*args, **kwargs)
+
     def construct(self):
         self.rules_explanation()
 
     def rules_explanation(self):
 
         # Form 5x5 grid in the middle
-        grid = GameOfLifeGrid(7, 7)
+        grid = GameOfLife(7, 7)
         self.play(LaggedStart(*[Create(c) for c in grid.cells], lag_ratio=0.01))
         self.next_slide()
 
@@ -64,14 +68,14 @@ class Intro(Slide):
 
         # Declare skull and smile svgs and actual icon that will appear on screen
         skull = (
-            SVGMobject("src/skull.svg")
+            SVGMobject(str(RES_DIR / "skull.svg"))
             .set_fill(WHITE)
             .set_height(grid.get_cell(0, 0).get_height() * 0.6)
             .move_to(grid.get_cell(0, 0).get_center())
             .set_z_index(ICONS_Z_INDEX)
         )
         smile = (
-            SVGMobject("src/smile.svg")
+            SVGMobject(str(RES_DIR / "smile.svg"))
             .set_fill(BLACK)
             .set_height(grid.get_cell(0, 0).get_height() * 0.6)
             .move_to(grid.get_cell(0, 0).get_center())
@@ -143,14 +147,20 @@ class Intro(Slide):
         self.community_achievements()
 
     def community_achievements(self):
-        cpu = VideoMobject(r"src\cpu recordings\sine_cpu.mp4")
-        display = VideoMobject(r"src\cpu recordings\sine_display.mp4")
-        gliders = VideoMobject(r"src\cpu recordings\gliders.mp4", loop=True)
-        cpu_credits = MathTex(
-            r"\text{@nicolasloizeau on github}",
-            font_size=10,
-            color=GREY_B,
-        ).to_corner(UR, buff=0.1).set_z_index(9999)
+        cpu = VideoMobject(str(RES_DIR / "cpu recordings" / "sine_cpu.mp4"))
+        display = VideoMobject(str(RES_DIR / "cpu recordings" / "sine_display.mp4"))
+        gliders = VideoMobject(str(RES_DIR / "cpu recordings" / "gliders.mp4"), loop=True)
+        gliders = Group(
+            gliders,
+            SurroundingRectangle(
+                gliders,
+                color=WHITE,
+                buff=0.05,
+                stroke_width=1,
+            ),
+        )
+        
+        cpu_credits = Credits("@nicolasloizeau on github")
 
         cpu.move_to(np.array([0.1, 0.0, 0.0])).set_height(8.0)
         display.move_to(np.array([4.0, -2.6, 0.0])).set_height(1.0).set_opacity(0)
@@ -223,7 +233,7 @@ class Intro(Slide):
         return anims, labels
 
     def conway(self, target_width_percentage):
-        img = ImageMobject("src/Conway picture.jpg")
+        img = ImageMobject(str(RES_DIR / "Conway picture.jpg"))
         img.set_height(target_width_percentage * config.frame_height)
 
         caption = Paragraph(

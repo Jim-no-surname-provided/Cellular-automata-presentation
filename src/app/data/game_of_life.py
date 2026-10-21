@@ -1,8 +1,9 @@
-from CellularAutomatonGrid import CellularAutomatonGrid
 from manim import *
 
+from .cellular_automaton import CellularAutomaton
 
-class GameOfLifeGrid(CellularAutomatonGrid):
+
+class GameOfLife(CellularAutomaton):
     """Conway's Game of Life (B3/S23) on a Moore 3x3 neighborhood."""
 
     # Center-first Moore neighborhood:
@@ -22,7 +23,7 @@ class GameOfLifeGrid(CellularAutomatonGrid):
         stroke_color=WHITE,
         stroke_width: float = 1.0,
         off_color=BLACK,
-        on_color=YELLOW,
+        on_color=YELLOW_E,
     ):
         super().__init__(
             rows=rows,

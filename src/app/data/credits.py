@@ -1,0 +1,57 @@
+from manim import GREY_B, UR, Text
+from manim.constants import NORMAL
+
+
+class Credits(Text):
+    def __init__(
+        self,
+        text,
+        fill_opacity=1,
+        stroke_width=0,
+        color=GREY_B,
+        font_size=10,
+        line_spacing=-1,
+        font="",
+        slant=NORMAL,
+        weight=NORMAL,
+        t2c=None,
+        t2f=None,
+        t2g=None,
+        t2s=None,
+        t2w=None,
+        gradient=None,
+        tab_width=4,
+        warn_missing_font=True,
+        height=None,
+        width=None,
+        should_center=True,
+        disable_ligatures=False,
+        use_svg_cache=False,
+        **kwargs,
+    ):
+        super().__init__(
+            text,
+            fill_opacity,
+            stroke_width,
+            color,
+            font_size,
+            line_spacing,
+            font,
+            slant,
+            weight,
+            t2c,
+            t2f,
+            t2g,
+            t2s,
+            t2w,
+            gradient,
+            tab_width,
+            warn_missing_font,
+            height,
+            width,
+            should_center,
+            disable_ligatures,
+            use_svg_cache,
+            **kwargs,
+        )
+        self.to_corner(UR, buff=0.1).set_z_index(9999)

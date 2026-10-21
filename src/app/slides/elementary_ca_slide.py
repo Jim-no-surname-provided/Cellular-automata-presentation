@@ -1,8 +1,14 @@
 from manim import *
 from manim_slides.slide import Slide
 
+from app.paths import SLIDES_DIR
+
 
 class Elementary_CA_Slide(Slide):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("output_folder", SLIDES_DIR)
+        super().__init__(*args, **kwargs)
+
 
     FIRST_THIRD = UP*config.frame_height*(1/6)
     SECOND_THIRD = DOWN*config.frame_height*(1/6)
@@ -242,4 +248,4 @@ class Elementary_CA_Slide(Slide):
             Transform(table.header_lines[0], table.header_lines[2]),
             run_time=0.4
         )
-        self.next_slide()
+        self.next_slide(auto_next=True)
