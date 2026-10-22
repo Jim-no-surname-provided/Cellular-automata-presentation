@@ -140,7 +140,11 @@ class RulesExamples(ThreeDSlide):
             self.remove(row)
         self.next_slide()
 
-        def render_ca(r: CellularAutomaton, fade_out: bool = True):
+        def render_ca(
+            r: CellularAutomaton,
+            fade_out: bool = True,
+            auto_next: bool = False,
+        ):
             image = r.to_image()
             cover = Rectangle(
                 width=image.width,
@@ -158,7 +162,7 @@ class RulesExamples(ThreeDSlide):
             )
 
             self.remove(cover)
-            self.next_slide()
+            self.next_slide(auto_next=auto_next)
             if fade_out:
                 self.play(FadeOut(image), run_time=0.4)
             return image
@@ -178,7 +182,7 @@ class RulesExamples(ThreeDSlide):
         render_ca(r30)
         render_ca(r30_random)
         self.shell3d(r30_shell)
-        render_ca(r34)
+        render_ca(r34, auto_next=True)
 
     def shell3d(
         self, eca: ElementaryCA, turns=3.25, duration=8, length=3, visible_width=100

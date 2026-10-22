@@ -25,7 +25,7 @@ class Title(Slide):
         """Plays the Cellular Automata title animation on the given Slide."""
         # Draw the title
         self.play(Write(self.title))
-        self.next_slide()
+        self.next_slide(auto_next=self.subtitle is None)
 
         # If subtitle, draw it its own slide
         texts = self.title

@@ -5,6 +5,7 @@ from manim import (
     DOWN,
     DR,
     LEFT,
+    LIGHT_GRAY,
     RIGHT,
     UP,
     Arrow,
@@ -84,28 +85,41 @@ class Ants(Slide):
         )
         self.next_slide()
         self.play(FadeOut(multiple_ants), FadeOut(multiple_humans))
-        
+
+        # Simulated ants video
         simulated_ants = VideoMobject(
             str(ANTS_DIR / "simulated_ants.mov"),
-        ).set_height(MEDIA_HEIGHT).move_to(LEFT * config.frame_width / 4)
-        self.play(FadeIn(simulated_ants))
+        ).set_height(MEDIA_HEIGHT)
 
-        # Show the individual rules beside the simulation
+        # Rules
         diagram = self.make_state_diagram()
         diagram.scale(0.85)
-        diagram.move_to(RIGHT * config.frame_width / 4)
-        self.play(Write(diagram, run_time=0.5))
+
+        # Position ants and rules
+        gap = (config.frame_width - 2 * simulated_ants.width) / 3
+        offset = (simulated_ants.width + gap) / 2
+        simulated_ants.move_to(LEFT * offset)
+        diagram.move_to(RIGHT * offset)
+
+        # Introduce them
+        simulated_ants.suspend_updating()
+        self.play(FadeIn(simulated_ants), Write(diagram.top))
+        self.next_slide()
+
+        # TODO: Write the second part of the diagram
+        self.play(Write(diagram.bottom))
+        self.next_slide(auto_next=True)
 
         # Finish playing the simulation with the rules visible
+        simulated_ants.resume_updating()
         self.wait(simulated_ants.remaining_time())
-        self.next_slide()
 
     def make_state_diagram(self):
         # Make each state with its description inside the rectangle
         def make_state(title, subtitle):
             labels = VGroup(
                 Text(title, font_size=22),
-                Text(subtitle, font_size=16),
+                Text(subtitle, font_size=16, color=LIGHT_GRAY),
             ).arrange(DOWN, buff=0.12)
 
             box = RoundedRectangle(
@@ -143,7 +157,7 @@ class Ants(Slide):
             return Arrow(
                 start,
                 end,
-                buff=0.1,
+                buff=0.2,
                 stroke_width=2,
                 tip_length=0.15,
                 max_tip_length_to_length_ratio=1,
@@ -159,7 +173,7 @@ class Ants(Slide):
         )
 
         # Separate the opposite arrows along the absolute horizontal axis
-        arrow_offset = RIGHT * 0.3
+        arrow_offset = RIGHT * 0.1
         attachment = connect(
             detached[0].get_top() + arrow_offset,
             informed[0].get_bottom() + arrow_offset,
@@ -175,13 +189,21 @@ class Ants(Slide):
             font_size=16,
         ).next_to(forgetting, DOWN, buff=0.12)
 
-        return VGroup(
+        top = VGroup(
             informed,
             uninformed,
-            detached,
-            attachment,
             forgetting,
-            detachment,
-            informed_detachment,
             forgetting_label,
         )
+        bottom = VGroup(
+            detached,
+            attachment,
+            detachment,
+            informed_detachment,
+        )
+        
+        # Keep both stages together for positioning and scaling
+        diagram = VGroup(top, bottom)
+        diagram.top = top
+        diagram.bottom = bottom
+        return diagram

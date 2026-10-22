@@ -12,6 +12,10 @@ class Formal_Def(Slide):
         kwargs.setdefault("output_folder", SLIDES_DIR)
         super().__init__(*args, **kwargs)
 
+    @property
+    def wait_time_between_slides(self) -> float:
+        return 0.1
+
     THIRD_UP = UP * config.frame_height * (1 / 6)
     THIRD_DOWN = DOWN * config.frame_height * (1 / 6)
     TOP = (config.frame_height / 2) * UP
@@ -181,9 +185,94 @@ class Formal_Def(Slide):
         self.Zd = self.expr.get_part_by_tex(r"\mathbb{Z}^d")
         self.play(self.focus_letter_animation(self.Zd), run_time=0.4)
 
+        # Set the same cell size for all three grids
+        cell_size = 0.2
+        cells = 7
+        width = cells * cell_size
+
+        # Make the strip and square with Manim's built-in grids
+        def make_plane(rows):
+            plane = NumberPlane(
+                x_range=[0, cells, 1],
+                y_range=[0, rows, 1],
+                x_length=width,
+                y_length=rows * cell_size,
+                axis_config={"stroke_opacity": 0},
+                background_line_style={
+                    "stroke_color": WHITE,
+                    "stroke_width": 1.5,
+                    "stroke_opacity": 1,
+                },
+                faded_line_ratio=0,
+            )
+
+            # Keep the outer edges visible even where the axes are hidden
+            border = Rectangle(
+                width=width,
+                height=rows * cell_size,
+                stroke_width=1.5,
+            ).move_to(plane)
+            return VGroup(plane, border)
+
+        grid_1 = make_plane(1)
+        grid_2 = make_plane(cells)
+
+        # Make the cube lattice with seven cells along all three axes
+        grid_3 = VGroup()
+        coordinates = np.linspace(-width / 2, width / 2, cells + 1)
+
+        for axis in range(3):
+            other_axes = [index for index in range(3) if index != axis]
+            for first in coordinates:
+                for second in coordinates:
+                    start = np.zeros(3)
+                    end = np.zeros(3)
+                    start[axis] = -width / 2
+                    end[axis] = width / 2
+                    start[other_axes] = [first, second]
+                    end[other_axes] = [first, second]
+                    grid_3.add(Line(start, end))
+
+        # Tilt the lattice and project it onto the screen
+        grid_3.rotate(25 * DEGREES, axis=UP)
+        grid_3.rotate(15 * DEGREES, axis=RIGHT)
+        grid_3.apply_matrix(np.diag([1, 1, 0]))
+        grid_3.set_stroke(width=0.8)
+
+        # Leave equal horizontal gaps around each label and grid
+        labels = VGroup()
+        rows = VGroup()
+
+        for dimension, grid in enumerate([grid_1, grid_2, grid_3], start=1):
+            label = MathTex(rf"\mathbb{{Z}}^{dimension}", font_size=32)
+            gap = (config.frame_width - label.width - grid.width) / 5
+            label.move_to(LEFT * (config.frame_width / 2 - 2 * gap - label.width / 2))
+            grid.move_to(RIGHT * (config.frame_width / 2 - 2 * gap - grid.width / 2))
+            labels.add(label)
+            rows.add(VGroup(label, grid))
+
+        # Stack the rows without changing their horizontal positions
+        rows.arrange(
+            DOWN,
+            buff=0.35,
+            center=False,
+            coor_mask=np.array([0, 1, 0]),
+        )
+        rows.shift(UP * (0.4 - rows.get_center()[1]))
+
+        # Show the three dimensions together
+        self.play(
+            Write(labels),
+            Create(grid_1),
+            Create(grid_2),
+            Create(grid_3),
+        )
         self.next_slide()
         self.update_example(r"\mathbb{B}", r"\mathbb{Z}^1", r"\_", r"\_")
         self.next_slide()
+
+        # Remove the reference before showing the snowflake
+        self.play(FadeOut(rows), run_time=0.4)
         self.snowflake()
         self.einstein_hat()
 
@@ -261,8 +350,8 @@ class Formal_Def(Slide):
         einstein_hat_g = Group(einstein_hat, SurroundingRectangle(einstein_hat))
 
         credits_tex = Credits("@henrypdonahue on Github")
-        self.play(FadeIn(credits_tex))
-        self.add(einstein_hat_g)
+        einstein_hat.suspend_updating()
+        self.play(FadeIn(credits_tex), FadeIn(einstein_hat_g))
         self.next_slide()
         self.wait(einstein_hat.remaining_time())
         self.next_slide()
@@ -494,7 +583,7 @@ class Formal_Def(Slide):
 
         # White smiley in origin cell
         smile = (
-            SVGMobject(str(RES_DIR / "smile.svg"))
+            SVGMobject(str(RES_DIR / "icons" / "smile.svg"))
             .set_color(WHITE)
             .set_height(cell_size / 3)
             .move_to(grid.get_cell(0, 0).get_center())
@@ -650,7 +739,7 @@ class Formal_Def(Slide):
 
         self.play(Create(blob), run_time=0.4)
         self.play(Create(arrow), run_time=0.4)
-        self.next_slide()
+        self.next_slide(auto_next=True)
 
         return tau, arrow, blob
 

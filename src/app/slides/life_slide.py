@@ -11,6 +11,10 @@ class LifeSlide(Slide):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("output_folder", SLIDES_DIR)
         super().__init__(*args, **kwargs)
+        
+    @property
+    def wait_time_between_slides(self) -> float:
+        return 0.1
 
     def construct(self):
         self.rules_explanation()
@@ -187,7 +191,7 @@ class LifeSlide(Slide):
         else:
             self.wait(max(cpu.remaining_time(), display.remaining_time()))
 
-        self.next_slide()
+        self.next_slide(auto_next=True)
         self.play(
             FadeOut(cpu),
             FadeOut(display),
